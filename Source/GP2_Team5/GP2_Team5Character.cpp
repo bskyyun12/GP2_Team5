@@ -67,9 +67,6 @@ UGravityMovementComponent* AGP2_Team5Character::GetGravityMovementComponent()
 void AGP2_Team5Character::BeginPlay()
 {
 	Super::BeginPlay();
-
-	InteractBox->OnComponentBeginOverlap.AddDynamic(this, &AGP2_Team5Character::OnBoxBeginOverlap);
-	InteractBox->OnComponentEndOverlap.AddDynamic(this, &AGP2_Team5Character::OnBoxEndOverlap);
 }
 
 void AGP2_Team5Character::Tick(float DeltaSeconds)
@@ -108,25 +105,6 @@ void AGP2_Team5Character::Tick(float DeltaSeconds)
 
 //////////////////////////////////////////////////////////////////////////
 // Interact
-void AGP2_Team5Character::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyindex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	Interactable = Cast<IInteractionInterface>(OtherActor);
-
-	if (Interactable != nullptr)
-	{
-		Interactable->ShowInteractionWidget();
-	}
-}
-
-void AGP2_Team5Character::OnBoxEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (Interactable != nullptr)
-	{
-		Interactable->HideInteractionWidget();
-		Interactable = nullptr;
-	}
-}
-
 void AGP2_Team5Character::OnInteract()
 {
 	if (Interactable)
