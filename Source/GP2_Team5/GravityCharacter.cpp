@@ -25,6 +25,10 @@ void AGravityCharacter::Tick(float DeltaTime)
 	auto oldGravDir = CachedGravityMovementyCmp->GetGravityDirection();
 	auto newGravDir = GravityPoint - GetActorLocation();
 	newGravDir.Normalize();
+	if (bFlipGravity)
+	{
+		newGravDir = newGravDir * -1.f;
+	}
 
 	auto result = FMath::VInterpTo(oldGravDir, newGravDir, DeltaTime, GravityChangeSpeed);
 	CachedGravityMovementyCmp->SetGravityDirection(result);

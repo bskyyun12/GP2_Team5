@@ -47,4 +47,7 @@ protected:
 	/* The rate at which gravity changes from old to new target */
 	UPROPERTY(EditAnywhere, Category = "Gravity")
 		float GravityChangeSpeed = 25.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gravity")
+	bool bFlipGravity = false;
 };
