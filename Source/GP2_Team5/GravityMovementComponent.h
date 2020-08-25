@@ -49,7 +49,7 @@ public:
 	virtual bool IsWithinEdgeTolerance(const FVector& CapsuleLocation, const FVector& TestImpactPoint, const float CapsuleRadius) const override;
 	// End UCharacterMovementComponent overrides
 
-protected:
+public:
 	// Return the normalized direction of the current gravity.
 	// @note Could return zero gravity.
 	// 
@@ -63,7 +63,7 @@ protected:
 	// @param NewGravityDirection - New gravity direction, assumes it isn't normalize
 	UFUNCTION(Category = "Pawn|Components|CharacterMovement", BlueprintCallable)
 		virtual void SetGravityDirection(FVector NewGravityDirection);
-
+protected:
 	// Begin UCharacterMovementComponent overrides
 	virtual void PhysFlying(float deltaTime, int32 Iterations) override;
 	virtual float BoostAirControl(float DeltaTime, float TickAirControl, const FVector& FallAcceleration) override;
