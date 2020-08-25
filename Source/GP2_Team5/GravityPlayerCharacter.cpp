@@ -9,8 +9,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-AGravityPlayerCharacter::AGravityPlayerCharacter(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<UGravityMovementComponent>(ACharacter::CharacterMovementComponentName))
+AGravityPlayerCharacter::AGravityPlayerCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UGravityMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	// Tick is needed for gravity functionality
 	PrimaryActorTick.bCanEverTick = true;
@@ -50,6 +49,10 @@ AGravityPlayerCharacter::AGravityPlayerCharacter(const FObjectInitializer& Objec
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+	// Interaction
+	InteractBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Interaction box"));
+	InteractBox->SetupAttachment(RootComponent);
 }
 
 
@@ -67,6 +70,17 @@ void AGravityPlayerCharacter::Tick(float DeltaTime)
 	auto TargetRotation = UKismetMathLibrary::MakeRotationFromAxes(ForwardVector, RightVector, UpVector);
 	TargetRotation = FMath::RInterpTo(CameraBoom->GetComponentRotation(), TargetRotation, DeltaTime, 15);
 	CameraBoom->SetWorldRotation(TargetRotation);
+
+	// Interaction
+	if (Interactable != nullptr)
+	{
+		Interactable->HideInteractionWidget();
+	}
+	Interactable = GetClosestInteracterbleActor();
+	if (Interactable != nullptr)
+	{
+		Interactable->ShowInteractionWidget();
+	}
 }
 
 void AGravityPlayerCharacter::MoveRight(float Val)
@@ -78,6 +92,17 @@ void AGravityPlayerCharacter::MoveRight(float Val)
 	AddMovementInput({ 0.f,  result.Y, result.Z }, Val);
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Interact
+void AGravityPlayerCharacter::OnInteract()
+{
+	if (Interactable != nullptr)
+	{
+		Interactable->Interact();
+	}
+}
+// End Interact
+//////////////////////////////////////////////////////////////////////////
 
 void AGravityPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
@@ -85,5 +110,35 @@ void AGravityPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGravityPlayerCharacter::MoveRight);
+	PlayerInputComponent->BindAction("Interact", IE_Released, this, &AGravityPlayerCharacter::OnInteract);
+
+}
+
+IInteractionInterface* AGravityPlayerCharacter::GetClosestInteracterbleActor()
+{
+	TArray<AActor*> OverlappingActors;
+	InteractBox->GetOverlappingActors(OverlappingActors);
+	if (OverlappingActors.Num() == 0)
+	{
+		return nullptr;
+	}
+
+	if (Interactable != nullptr)
+	{
+		Interactable->HideInteractionWidget();
+		Interactable = nullptr;
+	}
+
+	// Get the closest actor among the Overlapping actors
+	AActor* ClosestActor = OverlappingActors[0];
+	for (auto CurrentActor : OverlappingActors)
+	{
+		if (GetDistanceTo(CurrentActor) < GetDistanceTo(ClosestActor))
+		{
+			ClosestActor = CurrentActor;
+		}
+	}
+
+	return Cast<IInteractionInterface>(ClosestActor);
 
 }

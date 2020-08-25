@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GravityCharacter.h"
+#include "Components/BoxComponent.h"
+#include "InteractionInterface.h"
 #include "GravityPlayerCharacter.generated.h"
 
 /**
@@ -44,4 +46,16 @@ private:
 	/** Camera boom positioning the camera beside the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
+
+	///////////////////////////////////////
+	// Interaction
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* InteractBox;
+
+	IInteractionInterface* Interactable = nullptr;
+
+	void OnInteract();
+	IInteractionInterface* GetClosestInteracterbleActor();
+	// Interaction
+	///////////////////////////////////////
 };
