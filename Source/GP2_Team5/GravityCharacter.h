@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "GravitySwappable.h"
+#include "ClickInteract.h"
 #include "GravityCharacter.generated.h"
 
 // -- forward declarations --
@@ -12,7 +13,7 @@ class UGravityMovementComponent;
 
 
 UCLASS()
-class GP2_TEAM5_API AGravityCharacter : public ACharacter, public IGravitySwappable
+class GP2_TEAM5_API AGravityCharacter : public ACharacter, public IGravitySwappable, public IClickInteract
 {
 	GENERATED_BODY()
 
@@ -21,11 +22,20 @@ public:
 	// Sets default values for this character's properties
 	AGravityCharacter(const FObjectInitializer& ObjectInitializer);
 
+	// IGravitySwappable
+	bool CanSwap(IGravitySwappable* other) override;
+	void SwapGravity(IGravitySwappable* other) override;
+	bool GetFlipGravity() override;
+	void SetFlipGravity(bool bNewGravity) override;
 
-	void CanSwap(IGravitySwappable* other) override;
+	// IClickInteract
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void ClickInteract() override;
+	virtual void ClickInteract_Implementation();
 
-
-	void FlipGravity() override;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void ResetClickInteract() override;
+	virtual void ResetClickInteract_Implementation();
 
 protected:
 	// Called when the game starts or when spawned

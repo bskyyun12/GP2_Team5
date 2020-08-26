@@ -40,12 +40,35 @@ void AGravityCube::SetGravityTarget(FVector NewGravityPoint)
 	GravityPoint = NewGravityPoint;
 }
 
-void AGravityCube::CanSwap(IGravitySwappable* other)
+bool AGravityCube::CanSwap(IGravitySwappable* other)
 {
-
+	return GetFlipGravity() != other->GetFlipGravity();
 }
 
-void AGravityCube::FlipGravity()
+void AGravityCube::SwapGravity(IGravitySwappable* other)
 {
-	bFlipGravity = !bFlipGravity;
+	bool bThisFlipGravity = GetFlipGravity();
+
+	SetFlipGravity(other->GetFlipGravity());
+	other->SetFlipGravity(bThisFlipGravity);
+}
+
+void AGravityCube::ClickInteract_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ClickInteract: %s"), *this->GetName());
+}
+
+void AGravityCube::ResetClickInteract_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ResetClickInteract: %s"), *this->GetName());
+}
+
+bool AGravityCube::GetFlipGravity()
+{
+	return bFlipGravity;
+}
+
+void AGravityCube::SetFlipGravity(bool bNewGravity)
+{
+	bFlipGravity = bNewGravity;
 }

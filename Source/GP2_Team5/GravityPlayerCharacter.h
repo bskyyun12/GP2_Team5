@@ -7,6 +7,8 @@
 #include "Components/BoxComponent.h"
 #include "InteractionInterface.h"
 #include "GravityCube.h"
+#include "GravitySwappable.h"
+#include "ClickInteract.h"	
 #include "GravityPlayerCharacter.generated.h"
 
 /**
@@ -57,16 +59,22 @@ private:
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* InteractBox;
 
+	UPROPERTY(EditAnywhere)
+	float ClickInteractRange = 700.f;
+
 	IInteractionInterface* Interactable = nullptr;
 
+	IGravitySwappable* FirstFocus = nullptr;
+
+	IClickInteract* CurrentClickFocus = nullptr;
+
 	void OnInteract();
-	
+
 	IInteractionInterface* GetClosestInteracterbleActor();
 
-	void OnSelect();
+	void OnClick();
 
-	UPROPERTY(VisibleAnywhere)
-	AGravityCube* CurrentFocus;
+
 	// Interaction
 	///////////////////////////////////////
 };

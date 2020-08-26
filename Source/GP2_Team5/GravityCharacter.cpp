@@ -12,14 +12,37 @@ AGravityCharacter::AGravityCharacter(const FObjectInitializer& ObjectInitializer
 	CachedGravityMovementyCmp = Cast<UGravityMovementComponent>(GetMovementComponent());
 }
 
-void AGravityCharacter::CanSwap(IGravitySwappable* other)
+bool AGravityCharacter::CanSwap(IGravitySwappable* other)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	return true;
 }
 
-void AGravityCharacter::FlipGravity()
+void AGravityCharacter::SwapGravity(IGravitySwappable* other)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	bool bThisFlipGravity = GetFlipGravity();
+
+	SetFlipGravity(other->GetFlipGravity());
+	other->SetFlipGravity(bThisFlipGravity);
+}
+
+void AGravityCharacter::ClickInteract_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ClickInteract: %s"), *this->GetName());
+}
+
+void AGravityCharacter::ResetClickInteract_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ResetClickInteract: %s"), *this->GetName());
+}
+
+bool AGravityCharacter::GetFlipGravity()
+{
+	return bFlipGravity;
+}
+
+void AGravityCharacter::SetFlipGravity(bool bNewGravity)
+{
+	bFlipGravity = bNewGravity;
 }
 
 // Called when the game starts or when spawned
