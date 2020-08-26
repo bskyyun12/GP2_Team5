@@ -8,6 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "InteractionInterface.h"
 
 AGravityPlayerCharacter::AGravityPlayerCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UGravityMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
@@ -101,6 +102,38 @@ void AGravityPlayerCharacter::OnInteract()
 		Interactable->Interact();
 	}
 }
+
+void AGravityPlayerCharacter::OnSelect()
+{
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel1));	// Interaction
+
+	FHitResult Hit;
+	GetWorld()->GetFirstPlayerController()->GetHitResultUnderCursorForObjects(ObjectTypes, true, Hit);
+
+	if (Hit.bBlockingHit)
+	{
+		AActor* HitActor = Hit.GetActor();	
+		
+		AGravityPlayerCharacter* Player = Cast<AGravityPlayerCharacter>(HitActor);
+		if (Player != nullptr)
+		{
+			Player->bFlipGravity = !Player->bFlipGravity;
+		}
+
+
+		IInteractionInterface* InteractableActor = Cast<IInteractionInterface>(HitActor);
+		if (InteractableActor != nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Interactable object is clicked"));
+		}
+
+
+		UE_LOG(LogTemp, Warning, TEXT("Selected: %s"), *HitActor->GetName());
+	}
+}
+
 // End Interact
 //////////////////////////////////////////////////////////////////////////
 
@@ -111,6 +144,7 @@ void AGravityPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGravityPlayerCharacter::MoveRight);
 	PlayerInputComponent->BindAction("Interact", IE_Released, this, &AGravityPlayerCharacter::OnInteract);
+	PlayerInputComponent->BindAction("LeftMouseButton", IE_Released, this, &AGravityPlayerCharacter::OnSelect);
 
 }
 

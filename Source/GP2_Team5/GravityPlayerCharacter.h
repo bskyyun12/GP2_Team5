@@ -55,6 +55,7 @@ private:
 	IInteractionInterface* Interactable = nullptr;
 
 	void OnInteract();
+	void OnSelect();
 	IInteractionInterface* GetClosestInteracterbleActor();
 	// Interaction
 	///////////////////////////////////////
