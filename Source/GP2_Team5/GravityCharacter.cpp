@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "GravityMovementComponent.h"
 #include "GravityCharacter.h"
+#include "GravityMovementComponent.h"
 
 // Sets default values
 AGravityCharacter::AGravityCharacter(const FObjectInitializer& ObjectInitializer)

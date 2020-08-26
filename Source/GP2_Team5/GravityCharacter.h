@@ -36,7 +36,7 @@ public:
 	void SetGravityTarget(FVector NewGravityPoint);
 
 	UFUNCTION(BlueprintPure)
-	const UGravityMovementComponent* GetGravityMovementComponent() const { return CachedGravityMovementyCmp; }
+	UGravityMovementComponent* GetGravityMovementComponent() const { return CachedGravityMovementyCmp; }
 protected:
 	UGravityMovementComponent* CachedGravityMovementyCmp = nullptr;
 
