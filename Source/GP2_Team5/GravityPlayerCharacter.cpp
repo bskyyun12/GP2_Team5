@@ -147,8 +147,9 @@ void AGravityPlayerCharacter::OnSelect()
 			else if (CurrentFocus != GravityCube)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("different AGravityCube object is clicked"));
-				//CurrentFocus->bfl
-				CurrentFocus = GravityCube;
+				CurrentFocus->FlipGravity();
+				GravityCube->FlipGravity();
+				CurrentFocus = nullptr;
 			}
 		}
 		else

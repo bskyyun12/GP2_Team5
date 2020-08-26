@@ -47,5 +47,5 @@ void AGravityCube::CanSwap(IGravitySwappable* other)
 
 void AGravityCube::FlipGravity()
 {
-
+	bFlipGravity = !bFlipGravity;
 }
