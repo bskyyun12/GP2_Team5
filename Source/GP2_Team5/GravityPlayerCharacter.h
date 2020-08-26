@@ -6,6 +6,7 @@
 #include "GravityCharacter.h"
 #include "Components/BoxComponent.h"
 #include "InteractionInterface.h"
+#include "GravityCube.h"
 #include "GravityPlayerCharacter.generated.h"
 
 /**
@@ -23,6 +24,7 @@ public:
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
 
 protected:
 
@@ -58,8 +60,13 @@ private:
 	IInteractionInterface* Interactable = nullptr;
 
 	void OnInteract();
-	void OnSelect();
+	
 	IInteractionInterface* GetClosestInteracterbleActor();
+
+	void OnSelect();
+
+	UPROPERTY(VisibleAnywhere)
+	AGravityCube* CurrentFocus;
 	// Interaction
 	///////////////////////////////////////
 };

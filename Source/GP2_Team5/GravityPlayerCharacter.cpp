@@ -9,6 +9,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InteractionInterface.h"
+#include "GravityCube.h"
 
 AGravityPlayerCharacter::AGravityPlayerCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UGravityMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
@@ -56,25 +57,19 @@ AGravityPlayerCharacter::AGravityPlayerCharacter(const FObjectInitializer& Objec
 	InteractBox->SetupAttachment(RootComponent);
 }
 
-
-
 void AGravityPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bRotateCameraToPlayer)
-	{
-		// Calculate three vector to make the rotation space for camera
-		const FVector ForwardVector{ -1.0f, 0.0f, 0.0f };
-		auto UpVector = UKismetMathLibrary::GetDirectionUnitVector(GravityPoint, GetActorLocation());
-		auto RightVector = FVector::CrossProduct(UpVector, ForwardVector);
+	// Calculate three vector to make the rotation space for camera
+	const FVector ForwardVector{ -1.0f, 0.0f, 0.0f };
+	auto UpVector = UKismetMathLibrary::GetDirectionUnitVector(GravityPoint, GetActorLocation());
+	auto RightVector = FVector::CrossProduct(UpVector, ForwardVector);
 
-		// Calculate the rotation and set rotation
-		auto TargetRotation = UKismetMathLibrary::MakeRotationFromAxes(ForwardVector, RightVector, UpVector);
-		TargetRotation = FMath::RInterpTo(CameraBoom->GetComponentRotation(), TargetRotation, DeltaTime, 15);
-		CameraBoom->SetWorldRotation(TargetRotation);
-	}
-
+	// Calculate the rotation and set rotation
+	auto TargetRotation = UKismetMathLibrary::MakeRotationFromAxes(ForwardVector, RightVector, UpVector);
+	TargetRotation = FMath::RInterpTo(CameraBoom->GetComponentRotation(), TargetRotation, DeltaTime, 15);
+	CameraBoom->SetWorldRotation(TargetRotation);
 
 	// Interaction
 	if (Interactable != nullptr)
@@ -92,14 +87,8 @@ void AGravityPlayerCharacter::MoveRight(float Val)
 {
 	// Add movement with consideration to the direction of camera
 	FVector localMove{ 0.0f, 1.0f, 0.0f };
-
-	const FVector ForwardVector{ -1.0f, 0.0f, 0.0f };
-	auto UpVector = UKismetMathLibrary::GetDirectionUnitVector(GravityPoint, GetActorLocation());
-	auto RightVector = FVector::CrossProduct(UpVector, ForwardVector);
-
-	auto Rotation = UKismetMathLibrary::MakeRotationFromAxes(ForwardVector, RightVector, UpVector).Quaternion();
-
-	auto result = Rotation * localMove;
+	auto cameraRotation = CameraBoom->GetComponentRotation().Quaternion();
+	auto result = cameraRotation * localMove;
 	AddMovementInput({ 0.f,  result.Y, result.Z }, Val);
 }
 
@@ -117,6 +106,7 @@ void AGravityPlayerCharacter::OnSelect()
 {
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_PhysicsBody));
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel1));	// Interaction
 
 	FHitResult Hit;
@@ -124,8 +114,9 @@ void AGravityPlayerCharacter::OnSelect()
 
 	if (Hit.bBlockingHit)
 	{
-		AActor* HitActor = Hit.GetActor();	
-		
+		AActor* HitActor = Hit.GetActor();
+		UE_LOG(LogTemp, Warning, TEXT("Selected: %s"), *HitActor->GetName());
+
 		AGravityPlayerCharacter* Player = Cast<AGravityPlayerCharacter>(HitActor);
 		if (Player != nullptr)
 		{
@@ -139,8 +130,37 @@ void AGravityPlayerCharacter::OnSelect()
 			UE_LOG(LogTemp, Warning, TEXT("Interactable object is clicked"));
 		}
 
+		AGravityCube* GravityCube = Cast<AGravityCube>(HitActor);
+		if (GravityCube != nullptr)
+		{						
+			UE_LOG(LogTemp, Warning, TEXT("AGravityCube object is clicked"));
 
-		UE_LOG(LogTemp, Warning, TEXT("Selected: %s"), *HitActor->GetName());
+			if (CurrentFocus == nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("CurrentFocus is null. setting CurrentFocus"));
+				CurrentFocus = GravityCube;
+			}
+			else if (CurrentFocus == GravityCube)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Same AGravityCube object is clicked"));
+			}
+			else if (CurrentFocus != GravityCube)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("different AGravityCube object is clicked"));
+				//CurrentFocus->bfl
+				CurrentFocus = GravityCube;
+			}
+		}
+		else
+		{
+			CurrentFocus = nullptr;
+			UE_LOG(LogTemp, Warning, TEXT("This is not clickable object. Reset CurrentFocus"));
+		}
+	}
+	else
+	{
+		CurrentFocus = nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("Hit Nothing. Reset CurrentFocus"));
 	}
 }
 
