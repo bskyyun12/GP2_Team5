@@ -6,6 +6,7 @@
 #include "GravityCharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "GravitySwappable.h"
+#include "ClickInteract.h"
 
 #include "GravityCube.generated.h"
 
@@ -13,7 +14,7 @@
  * 
  */
 UCLASS()
-class GP2_TEAM5_API AGravityCube : public AActor, public IGravitySwappable
+class GP2_TEAM5_API AGravityCube : public AActor, public IGravitySwappable, public IClickInteract
 {
 	GENERATED_BODY()
 
@@ -27,8 +28,19 @@ class GP2_TEAM5_API AGravityCube : public AActor, public IGravitySwappable
 public:
 
 	// IGravitySwappable
-	virtual void CanSwap(IGravitySwappable* other) override;
-	virtual void FlipGravity() override;
+	virtual bool CanSwap(IGravitySwappable* other) override;
+	virtual void SwapGravity(IGravitySwappable* other) override;
+	bool GetFlipGravity() override;
+	void SetFlipGravity(bool bNewGravity) override;
+
+	// IClickInteract
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void ClickInteract() override;
+	virtual void ClickInteract_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void ResetClickInteract() override;
+	virtual void ResetClickInteract_Implementation();
 
 protected:
 

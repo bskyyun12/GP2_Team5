@@ -22,7 +22,9 @@ class GP2_TEAM5_API IGravitySwappable
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void CanSwap(IGravitySwappable* other);
-	virtual void FlipGravity();
+	virtual bool CanSwap(IGravitySwappable* other);
+	virtual void SwapGravity(IGravitySwappable* other);
+	virtual bool GetFlipGravity();
+	virtual void SetFlipGravity(bool bNewGravity);
 
 };

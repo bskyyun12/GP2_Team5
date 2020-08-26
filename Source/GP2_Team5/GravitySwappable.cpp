@@ -5,12 +5,22 @@
 
 // Add default functionality here for any IGravitySwappable functions that are not pure virtual.
 
-void IGravitySwappable::CanSwap(IGravitySwappable* other)
+bool IGravitySwappable::CanSwap(IGravitySwappable* other)
+{
+	return true;
+}
+
+void IGravitySwappable::SwapGravity(IGravitySwappable* other)
 {
 
 }
 
-void IGravitySwappable::FlipGravity()
+bool IGravitySwappable::GetFlipGravity()
+{
+	return true;
+}
+
+void IGravitySwappable::SetFlipGravity(bool bNewGravity)
 {
 
 }
