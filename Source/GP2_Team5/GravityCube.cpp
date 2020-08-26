@@ -25,7 +25,7 @@ void AGravityCube::Tick(float DeltaTime)
 
 	auto force = ClampedDeltaTime * GravityAcceleration * Mesh->GetMass();
 	auto forceVector = GravityDirection * force;
-	printvector_time(forceVector, DeltaTime);
+	//printvector_time(forceVector, DeltaTime);
 	Mesh->AddForce(GravityDirection * force, NAME_None, true);
 }
 
