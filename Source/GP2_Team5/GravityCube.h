@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GravityCharacter.h"
 #include "Components/StaticMeshComponent.h"
+#include "GravitySwappable.h"
 
 #include "GravityCube.generated.h"
 
@@ -12,7 +13,7 @@
  * 
  */
 UCLASS()
-class GP2_TEAM5_API AGravityCube : public AActor
+class GP2_TEAM5_API AGravityCube : public AActor, public IGravitySwappable
 {
 	GENERATED_BODY()
 
@@ -23,6 +24,11 @@ class GP2_TEAM5_API AGravityCube : public AActor
 	UFUNCTION(BlueprintCallable)
 	void SetGravityTarget(FVector NewGravityPoint);
 
+public:
+
+	// IGravitySwappable
+	virtual void CanSwap(IGravitySwappable* other) override;
+	virtual void FlipGravity() override;
 
 protected:
 

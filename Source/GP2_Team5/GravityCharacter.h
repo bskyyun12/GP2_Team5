@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GravitySwappable.h"
 #include "GravityCharacter.generated.h"
 
 // -- forward declarations --
@@ -11,7 +12,7 @@ class UGravityMovementComponent;
 
 
 UCLASS()
-class GP2_TEAM5_API AGravityCharacter : public ACharacter
+class GP2_TEAM5_API AGravityCharacter : public ACharacter, public IGravitySwappable
 {
 	GENERATED_BODY()
 
@@ -19,6 +20,12 @@ class GP2_TEAM5_API AGravityCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AGravityCharacter(const FObjectInitializer& ObjectInitializer);
+
+
+	void CanSwap(IGravitySwappable* other) override;
+
+
+	void FlipGravity() override;
 
 protected:
 	// Called when the game starts or when spawned
