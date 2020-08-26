@@ -11,7 +11,7 @@ AGravityCube::AGravityCube()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	Mesh->SetSimulatePhysics(true);
 	Mesh->SetEnableGravity(false);
-	Mesh->SetAngularDamping(10.f);
+	Mesh->SetAngularDamping(2.f);
 	Mesh->SetConstraintMode(EDOFMode::YZPlane);
 	Mesh->SetCollisionProfileName("PhysicsActor");
 
@@ -25,8 +25,14 @@ void AGravityCube::Tick(float DeltaTime)
 
 	auto force = ClampedDeltaTime * GravityAcceleration * Mesh->GetMass();
 	auto forceVector = GravityDirection * force;
-	//printvector_time(forceVector, DeltaTime);
-	Mesh->AddForce(GravityDirection * force, NAME_None, true);
+	if (bFlipGravity)
+	{
+		Mesh->AddForce(GravityDirection * force * -1.f, NAME_None, true);
+	}
+	else
+	{
+		Mesh->AddForce(GravityDirection * force, NAME_None, true);
+	}
 }
 
 void AGravityCube::SetGravityTarget(FVector NewGravityPoint)

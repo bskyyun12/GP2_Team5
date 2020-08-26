@@ -62,15 +62,19 @@ void AGravityPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Calculate three vector to make the rotation space for camera
-	const FVector ForwardVector{ -1.0f, 0.0f, 0.0f };
-	auto UpVector = UKismetMathLibrary::GetDirectionUnitVector(GravityPoint, GetActorLocation());
-	auto RightVector = FVector::CrossProduct(UpVector, ForwardVector);
+	if (bRotateCameraToPlayer)
+	{
+		// Calculate three vector to make the rotation space for camera
+		const FVector ForwardVector{ -1.0f, 0.0f, 0.0f };
+		auto UpVector = UKismetMathLibrary::GetDirectionUnitVector(GravityPoint, GetActorLocation());
+		auto RightVector = FVector::CrossProduct(UpVector, ForwardVector);
 
-	// Calculate the rotation and set rotation
-	auto TargetRotation = UKismetMathLibrary::MakeRotationFromAxes(ForwardVector, RightVector, UpVector);
-	TargetRotation = FMath::RInterpTo(CameraBoom->GetComponentRotation(), TargetRotation, DeltaTime, 15);
-	CameraBoom->SetWorldRotation(TargetRotation);
+		// Calculate the rotation and set rotation
+		auto TargetRotation = UKismetMathLibrary::MakeRotationFromAxes(ForwardVector, RightVector, UpVector);
+		TargetRotation = FMath::RInterpTo(CameraBoom->GetComponentRotation(), TargetRotation, DeltaTime, 15);
+		CameraBoom->SetWorldRotation(TargetRotation);
+	}
+
 
 	// Interaction
 	if (Interactable != nullptr)
@@ -88,8 +92,14 @@ void AGravityPlayerCharacter::MoveRight(float Val)
 {
 	// Add movement with consideration to the direction of camera
 	FVector localMove{ 0.0f, 1.0f, 0.0f };
-	auto cameraRotation = CameraBoom->GetComponentRotation().Quaternion();
-	auto result = cameraRotation * localMove;
+
+	const FVector ForwardVector{ -1.0f, 0.0f, 0.0f };
+	auto UpVector = UKismetMathLibrary::GetDirectionUnitVector(GravityPoint, GetActorLocation());
+	auto RightVector = FVector::CrossProduct(UpVector, ForwardVector);
+
+	auto Rotation = UKismetMathLibrary::MakeRotationFromAxes(ForwardVector, RightVector, UpVector).Quaternion();
+
+	auto result = Rotation * localMove;
 	AddMovementInput({ 0.f,  result.Y, result.Z }, Val);
 }
 

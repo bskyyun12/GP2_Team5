@@ -47,6 +47,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
 
+	UPROPERTY(EditDefaultsOnly, Category="Camera")
+	bool bRotateCameraToPlayer = false;
+
 	///////////////////////////////////////
 	// Interaction
 	UPROPERTY(EditAnywhere)
