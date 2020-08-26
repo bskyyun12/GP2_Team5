@@ -770,7 +770,7 @@ void UGravityMovementComponent::MoveAlongFloor(const FVector& InVelocity, float 
 	}
 
 	SafeMoveUpdatedComponent(RampVector, CharacterOwner->GetActorRotation(), true, Hit);
-	UE_LOG(LogTemp, Warning, TEXT("RampVector %s    delta %s      velocity %s"), *RampVector.ToString(), *Delta.ToString(), *InVelocity.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("RampVector %s    delta %s      velocity %s"), *RampVector.ToString(), *Delta.ToString(), *InVelocity.ToString());
 
 	float LastMoveTimeSlice = DeltaSeconds;
 	if (Hit.bStartPenetrating)
