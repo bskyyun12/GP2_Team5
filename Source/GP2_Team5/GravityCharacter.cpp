@@ -105,27 +105,33 @@ void AGravityCharacter::BeginPlay()
 
 void AGravityCharacter::Tick(float DeltaTime)
 {
-	// Apply gravity to character
 	Super::Tick(DeltaTime);
-	auto oldGravDir = CachedGravityMovementyCmp->GetGravityDirection();
-	auto newGravDir = GravityPoint - GetActorLocation();
-	newGravDir.Normalize();
+
+	// Keep Character locked in X axis at all times
+	FVector ConstrainedLocation = GetActorLocation();
+	ConstrainedLocation.X = 0.0f;
+	SetActorLocation(ConstrainedLocation);
+
+	// Apply gravity to character
+	const FVector OldGravityDir = CachedGravityMovementyCmp->GetGravityDirection();
+	FVector NewGravityDir = GravityPoint - GetActorLocation();
+	NewGravityDir.Normalize();
 	if (bFlipGravity)
 	{
-		newGravDir = newGravDir * -1.f;
+		NewGravityDir = NewGravityDir * -1.f;
 	}
 
-	auto result = FMath::VInterpTo(oldGravDir, newGravDir, DeltaTime, GravityChangeSpeed);
-	CachedGravityMovementyCmp->SetGravityDirection(result);
+	NewGravityDir = FMath::VInterpTo(OldGravityDir, NewGravityDir, DeltaTime, GravityChangeSpeed);
+	CachedGravityMovementyCmp->SetGravityDirection(NewGravityDir);
 
 
 	// Calculate three vector to make the rotation space for camera
 	const FVector ForwardVector{ -1.0f, 0.0f, 0.0f };
-	auto UpVector = UKismetMathLibrary::GetDirectionUnitVector(GravityPoint, GetActorLocation());
-	auto RightVector = FVector::CrossProduct(UpVector, ForwardVector);
+	const FVector UpVector = UKismetMathLibrary::GetDirectionUnitVector(GravityPoint, GetActorLocation());
+	const FVector RightVector = FVector::CrossProduct(UpVector, ForwardVector);
 
 	// Calculate the rotation and set rotation
-	auto TargetRotation = UKismetMathLibrary::MakeRotationFromAxes(ForwardVector, RightVector, UpVector);
+	FRotator TargetRotation = UKismetMathLibrary::MakeRotationFromAxes(ForwardVector, RightVector, UpVector);
 	TargetRotation = FMath::RInterpTo(CameraBoom->GetComponentRotation(), TargetRotation, DeltaTime, 15);
 	CameraBoom->SetWorldRotation(TargetRotation);
 
@@ -145,10 +151,11 @@ void AGravityCharacter::Tick(float DeltaTime)
 void AGravityCharacter::MoveRight(float Val)
 {
 	// Add movement with consideration to the direction of camera
-	FVector localMove{ 0.0f, 1.0f, 0.0f };
-	auto cameraRotation = CameraBoom->GetComponentRotation().Quaternion();
-	auto result = cameraRotation * localMove;
-	AddMovementInput({ 0.f,  result.Y, result.Z }, Val);
+	FVector LocalMove{ 0.0f, 1.0f, 0.0f };
+	FQuat CameraRotation = CameraBoom->GetComponentRotation().Quaternion();
+	FVector TranslatedMove = CameraRotation * LocalMove;
+	TranslatedMove.X = 0.0f;
+	AddMovementInput(TranslatedMove, Val);
 }
 
 void AGravityCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
