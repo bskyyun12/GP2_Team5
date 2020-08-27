@@ -121,7 +121,7 @@ void AGravityCharacter::Tick(float DeltaTime)
 		NewGravityDir = NewGravityDir * -1.f;
 	}
 
-	NewGravityDir = FMath::VInterpTo(OldGravityDir, NewGravityDir, DeltaTime, GravityChangeSpeed);
+	//NewGravityDir = FMath::VInterpTo(OldGravityDir, NewGravityDir, DeltaTime, GravityChangeSpeed);
 	CachedGravityMovementyCmp->SetGravityDirection(NewGravityDir);
 
 

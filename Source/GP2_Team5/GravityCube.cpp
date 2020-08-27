@@ -20,18 +20,21 @@ AGravityCube::AGravityCube()
 
 void AGravityCube::Tick(float DeltaTime)
 {
-	auto ClampedDeltaTime = FMath::Min(DeltaTime, 0.05f);
-	auto GravityDirection = UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), GravityPoint);
+	if (Mesh->IsSimulatingPhysics())
+	{
+		auto ClampedDeltaTime = FMath::Min(DeltaTime, 0.05f);
+		auto GravityDirection = UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), GravityPoint);
 
-	auto force = ClampedDeltaTime * GravityAcceleration * Mesh->GetMass();
-	auto forceVector = GravityDirection * force;
-	if (bFlipGravity)
-	{
-		Mesh->AddForce(GravityDirection * force * -1.f, NAME_None, true);
-	}
-	else
-	{
-		Mesh->AddForce(GravityDirection * force, NAME_None, true);
+		auto force = ClampedDeltaTime * GravityAcceleration * Mesh->GetMass();
+		auto forceVector = GravityDirection * force;
+		if (bFlipGravity)
+		{
+			Mesh->AddForce(GravityDirection * force * -1.f, NAME_None, true);
+		}
+		else
+		{
+			Mesh->AddForce(GravityDirection * force, NAME_None, true);
+		}
 	}
 }
 
