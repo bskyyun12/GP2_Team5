@@ -42,7 +42,11 @@ void AGravityCube::SetGravityTarget(FVector NewGravityPoint)
 
 bool AGravityCube::CanSwap(TScriptInterface<IGravitySwappable> Other)
 {
-	return GetFlipGravity() != Other->GetFlipGravity();
+	if (Other)
+	{
+		return GetFlipGravity() != Other->GetFlipGravity();
+	}
+	return false;
 }
 
 void AGravityCube::SwapGravity(TScriptInterface<IGravitySwappable> Other)
