@@ -18,7 +18,6 @@ ALightEmitter::ALightEmitter()
 void ALightEmitter::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 // Called every frame
@@ -31,8 +30,6 @@ void ALightEmitter::Tick(float DeltaTime)
 	Start.Normalize();
 
 	auto angle = FMath::Atan2(Start.Y, Start.Z);
-
-	
 
 	QuantizationLevel = FMath::Max(QuantizationLevel, 0.05f);
 
@@ -55,5 +52,4 @@ void ALightEmitter::Tick(float DeltaTime)
 			break;
 		}
 	}
-
 }

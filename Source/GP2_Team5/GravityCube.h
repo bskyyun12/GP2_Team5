@@ -27,9 +27,14 @@ class GP2_TEAM5_API AGravityCube : public AActor, public IGravitySwappable, publ
 
 public:
 
+	// Delegates
+
+	UPROPERTY(BlueprintAssignable)
+	FOnGravityChanged OnGravityChanged;
+
 	// IGravitySwappable
-	virtual bool CanSwap(IGravitySwappable* other) override;
-	virtual void SwapGravity(IGravitySwappable* other) override;
+	virtual bool CanSwap(TScriptInterface<IGravitySwappable> Other) override;
+	virtual void SwapGravity(TScriptInterface<IGravitySwappable> Other) override;
 	bool GetFlipGravity() override;
 	void SetFlipGravity(bool bNewGravity) override;
 

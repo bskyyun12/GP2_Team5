@@ -64,7 +64,7 @@ private:
 
 	IInteractionInterface* Interactable = nullptr;
 
-	IGravitySwappable* FirstFocus = nullptr;
+	TScriptInterface<IGravitySwappable> FirstFocus = nullptr;
 
 	IClickInteract* CurrentClickFocus = nullptr;
 

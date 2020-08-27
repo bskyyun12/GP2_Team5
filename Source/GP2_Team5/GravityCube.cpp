@@ -40,17 +40,17 @@ void AGravityCube::SetGravityTarget(FVector NewGravityPoint)
 	GravityPoint = NewGravityPoint;
 }
 
-bool AGravityCube::CanSwap(IGravitySwappable* other)
+bool AGravityCube::CanSwap(TScriptInterface<IGravitySwappable> Other)
 {
-	return GetFlipGravity() != other->GetFlipGravity();
+	return GetFlipGravity() != Other->GetFlipGravity();
 }
 
-void AGravityCube::SwapGravity(IGravitySwappable* other)
+void AGravityCube::SwapGravity(TScriptInterface<IGravitySwappable> Other)
 {
 	bool bThisFlipGravity = GetFlipGravity();
 
-	SetFlipGravity(other->GetFlipGravity());
-	other->SetFlipGravity(bThisFlipGravity);
+	SetFlipGravity(Other->GetFlipGravity());
+	Other->SetFlipGravity(bThisFlipGravity);
 }
 
 void AGravityCube::ClickInteract_Implementation()
@@ -71,4 +71,5 @@ bool AGravityCube::GetFlipGravity()
 void AGravityCube::SetFlipGravity(bool bNewGravity)
 {
 	bFlipGravity = bNewGravity;
+	OnGravityChanged.Broadcast(bNewGravity);
 }

@@ -139,7 +139,7 @@ void AGravityPlayerCharacter::OnClick()
 		}
 
 		// GravitySwap
-		IGravitySwappable* GravitySwappable = Cast<IGravitySwappable>(HitActor);
+		TScriptInterface<IGravitySwappable> GravitySwappable = TScriptInterface<IGravitySwappable>(HitActor);
 		if (GravitySwappable != nullptr)
 		{		
 			if (FirstFocus == nullptr)

@@ -8,6 +8,8 @@
 #include "ClickInteract.h"
 #include "GravityCharacter.generated.h"
 
+
+
 // -- forward declarations --
 class UGravityMovementComponent;
 
@@ -22,9 +24,13 @@ public:
 	// Sets default values for this character's properties
 	AGravityCharacter(const FObjectInitializer& ObjectInitializer);
 
+	// Delegates
+	UPROPERTY(BlueprintAssignable)
+	FOnGravityChanged OnGravityChanged;
+
 	// IGravitySwappable
-	bool CanSwap(IGravitySwappable* other) override;
-	void SwapGravity(IGravitySwappable* other) override;
+	bool CanSwap(TScriptInterface<IGravitySwappable> Other) override;
+	void SwapGravity(TScriptInterface<IGravitySwappable> Other) override;
 	bool GetFlipGravity() override;
 	void SetFlipGravity(bool bNewGravity) override;
 
@@ -38,15 +44,12 @@ public:
 	virtual void ResetClickInteract_Implementation();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 
 	// Sets the point the character gravitates towards
 	UFUNCTION(BlueprintCallable)

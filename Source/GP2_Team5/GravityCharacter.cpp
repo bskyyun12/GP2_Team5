@@ -12,17 +12,24 @@ AGravityCharacter::AGravityCharacter(const FObjectInitializer& ObjectInitializer
 	CachedGravityMovementyCmp = Cast<UGravityMovementComponent>(GetMovementComponent());
 }
 
-bool AGravityCharacter::CanSwap(IGravitySwappable* other)
+bool AGravityCharacter::CanSwap(TScriptInterface<IGravitySwappable> Other)
 {
 	return true;
 }
 
-void AGravityCharacter::SwapGravity(IGravitySwappable* other)
+void AGravityCharacter::SwapGravity(TScriptInterface<IGravitySwappable> Other)
 {
 	bool bThisFlipGravity = GetFlipGravity();
-
-	SetFlipGravity(other->GetFlipGravity());
-	other->SetFlipGravity(bThisFlipGravity);
+	if (Other)
+	{
+		SetFlipGravity(Other->GetFlipGravity());
+		Other->SetFlipGravity(bThisFlipGravity);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Flip gravity with null on objet : %s"), *this->GetName());
+		SetFlipGravity(!bThisFlipGravity);
+	}
 }
 
 void AGravityCharacter::ClickInteract_Implementation()
@@ -43,6 +50,7 @@ bool AGravityCharacter::GetFlipGravity()
 void AGravityCharacter::SetFlipGravity(bool bNewGravity)
 {
 	bFlipGravity = bNewGravity;
+	OnGravityChanged.Broadcast(bNewGravity);
 }
 
 // Called when the game starts or when spawned

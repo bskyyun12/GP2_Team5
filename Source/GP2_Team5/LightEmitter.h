@@ -26,5 +26,4 @@ public:
 	UPROPERTY(Editanywhere, BlueprintReadWrite)
 	float QuantizationLevel = 0.1F;
 
-
 };
