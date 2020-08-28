@@ -43,40 +43,30 @@ void AGravityCube::SetGravityTarget(FVector NewGravityPoint)
 	GravityPoint = NewGravityPoint;
 }
 
-bool AGravityCube::CanSwap(TScriptInterface<IGravitySwappable> Other)
-{
-	if (Other)
-	{
-		return GetFlipGravity() != Other->GetFlipGravity();
-	}
-	return false;
-}
+//bool AGravityCube::CanSwap(TScriptInterface<IGravitySwappable> Other)
+//{
+//	if (Other)
+//	{
+//		return GetFlipGravity() != Other->GetFlipGravity();
+//	}
+//	return false;
+//}
+//
+//void AGravityCube::SwapGravity(TScriptInterface<IGravitySwappable> Other)
+//{
+//	bool bThisFlipGravity = GetFlipGravity();
+//
+//	SetFlipGravity(Other->GetFlipGravity());
+//	Other->SetFlipGravity(bThisFlipGravity);
+//}
 
-void AGravityCube::SwapGravity(TScriptInterface<IGravitySwappable> Other)
-{
-	bool bThisFlipGravity = GetFlipGravity();
-
-	SetFlipGravity(Other->GetFlipGravity());
-	Other->SetFlipGravity(bThisFlipGravity);
-}
-
-void AGravityCube::ClickInteract_Implementation()
-{
-	UE_LOG(LogTemp, Warning, TEXT("ClickInteract: %s"), *this->GetName());
-}
-
-void AGravityCube::ResetClickInteract_Implementation()
-{
-	UE_LOG(LogTemp, Warning, TEXT("ResetClickInteract: %s"), *this->GetName());
-}
-
-bool AGravityCube::GetFlipGravity()
-{
-	return bFlipGravity;
-}
-
-void AGravityCube::SetFlipGravity(bool bNewGravity)
-{
-	bFlipGravity = bNewGravity;
-	OnGravityChanged.Broadcast(bNewGravity);
-}
+//bool AGravityCube::GetFlipGravity()
+//{
+//	return bFlipGravity;
+//}
+//
+//void AGravityCube::SetFlipGravity(bool bNewGravity)
+//{
+//	bFlipGravity = bNewGravity;
+//	OnGravityChanged.Broadcast(bNewGravity);
+//}

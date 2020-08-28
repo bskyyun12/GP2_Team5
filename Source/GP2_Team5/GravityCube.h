@@ -5,8 +5,7 @@
 #include "CoreMinimal.h"
 #include "GravityCharacter.h"
 #include "Components/StaticMeshComponent.h"
-#include "GravitySwappable.h"
-#include "ClickInteract.h"
+//#include "GravitySwappable.h"
 
 #include "GravityCube.generated.h"
 
@@ -14,7 +13,7 @@
  * 
  */
 UCLASS()
-class GP2_TEAM5_API AGravityCube : public AActor, public IGravitySwappable, public IClickInteract
+class GP2_TEAM5_API AGravityCube : public AActor//, public IGravitySwappable
 {
 	GENERATED_BODY()
 
@@ -33,19 +32,10 @@ public:
 	FOnGravityChanged OnGravityChanged;
 
 	// IGravitySwappable
-	virtual bool CanSwap(TScriptInterface<IGravitySwappable> Other) override;
-	virtual void SwapGravity(TScriptInterface<IGravitySwappable> Other) override;
-	bool GetFlipGravity() override;
-	void SetFlipGravity(bool bNewGravity) override;
-
-	// IClickInteract
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void ClickInteract() override;
-	virtual void ClickInteract_Implementation();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void ResetClickInteract() override;
-	virtual void ResetClickInteract_Implementation();
+	//bool CanSwap(TScriptInterface<IGravitySwappable> Other);
+	//void SwapGravity(TScriptInterface<IGravitySwappable> Other);
+	//bool GetFlipGravity() override;
+	//void SetFlipGravity(bool bNewGravity) override;
 
 protected:
 
@@ -61,6 +51,4 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gravity");
 	float GravityAcceleration = 500.F;
 
-private:
-	
 };

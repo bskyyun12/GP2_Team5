@@ -5,18 +5,33 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InteractionInterface.h"
+#include "ApproachInteract.h"
 #include "GravitySwappable.h"
 #include "ClickInteract.h"
 #include "GravityCharacter.generated.h"
 
 
+template<class T>
+UActorComponent* GetComponent(AActor* Actor) 
+{	
+	// Get ClosestActor's components and see if one of them implements UApproachInteract
+	TArray<UActorComponent*> Components = Actor->GetComponentsByInterface(T::StaticClass());
+	for (UActorComponent* Comp : Components)
+	{
+		if (Comp->GetClass()->ImplementsInterface(T::StaticClass()))
+		{
+			return Comp;
+		}
+	}
+	return nullptr;
+}
 
 //--- forward declarations ---
 class UGravityMovementComponent;
 
 
 UCLASS()
-class GP2_TEAM5_API AGravityCharacter : public ACharacter, public IGravitySwappable, public IClickInteract
+class GP2_TEAM5_API AGravityCharacter : public ACharacter//, public IGravitySwappable
 {
 	GENERATED_BODY()
 
@@ -26,24 +41,15 @@ public:
 	AGravityCharacter(const FObjectInitializer& ObjectInitializer);
 
 	// Delegates
-	UPROPERTY(BlueprintAssignable)
-	FOnGravityChanged OnGravityChanged;
+	//UPROPERTY(BlueprintAssignable)
+	//FOnGravityChanged OnGravityChanged;
 
 	// IGravitySwappable
-	bool CanSwap(TScriptInterface<IGravitySwappable> Other) override;
-	void SwapGravity(TScriptInterface<IGravitySwappable> Other) override;
-	bool GetFlipGravity() override { return bFlipGravity; };
-	void SetFlipGravity(bool bNewGravity) override;
+	//bool CanSwap(TScriptInterface<IGravitySwappable> Other);
+	//void SwapGravity(TScriptInterface<IGravitySwappable> Other);
+	//bool GetFlipGravity() override;
+	//void SetFlipGravity(bool bNewGravity) override;
 
-
-	// IClickInteract
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void ClickInteract() override;
-	virtual void ClickInteract_Implementation();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void ResetClickInteract() override;
-	virtual void ResetClickInteract_Implementation();
 
 protected: 
 	virtual void BeginPlay() override;
@@ -93,19 +99,22 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float ClickInteractRange = 700.f;
 
-	IInteractionInterface* Interactable = nullptr;
+	//IApproachInteract* ApproachInteractable = nullptr;
 
-	TScriptInterface<IGravitySwappable> FirstFocus = nullptr;
+	//TScriptInterface<IGravitySwappable> FirstFocus = nullptr;
 
-	IClickInteract* CurrentClickFocus = nullptr;
+	//IClickInteract* CurrentClickFocus = nullptr;
 
+	// Approach Interact
 	void OnInteract();
+	UActorComponent* TryGetApproachInteractableComp();
+	UActorComponent* ApproachInteractableComp = nullptr;
 
-	IInteractionInterface* GetClosestInteracterbleActor();
+	UActorComponent* CurrentClickFocus = nullptr;
+
+	UActorComponent* FirstFocus = nullptr;
 
 	void OnClick();
-
-
 // Interaction
 ///////////////////////////////////////
 };

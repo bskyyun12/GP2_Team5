@@ -14,6 +14,7 @@
 #include "GravitySwappable.h"
 #include "ClickInteract.h"	
 #include "DrawDebugHelpers.h"
+#include "GravitySwapComponent.h"
 
 // Sets default values
 AGravityCharacter::AGravityCharacter(const FObjectInitializer& ObjectInitializer)
@@ -62,41 +63,36 @@ AGravityCharacter::AGravityCharacter(const FObjectInitializer& ObjectInitializer
 	InteractBox->SetupAttachment(RootComponent);
 }
 
-bool AGravityCharacter::CanSwap(TScriptInterface<IGravitySwappable> Other)
-{
-	return true;
-}
+//bool AGravityCharacter::CanSwap(TScriptInterface<IGravitySwappable> Other)
+//{
+//	return true;
+//}
+//
+//void AGravityCharacter::SwapGravity(TScriptInterface<IGravitySwappable> Other)
+//{
+//	bool bThisFlipGravity = GetFlipGravity();
+//	if (Other)
+//	{
+//		SetFlipGravity(Other->GetFlipGravity());
+//		Other->SetFlipGravity(bThisFlipGravity);
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("Flip gravity with null on objet : %s"), *this->GetName());
+//		SetFlipGravity(!bThisFlipGravity);
+//	}
+//}
 
-void AGravityCharacter::SwapGravity(TScriptInterface<IGravitySwappable> Other)
-{
-	bool bThisFlipGravity = GetFlipGravity();
-	if (Other)
-	{
-		SetFlipGravity(Other->GetFlipGravity());
-		Other->SetFlipGravity(bThisFlipGravity);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Flip gravity with null on objet : %s"), *this->GetName());
-		SetFlipGravity(!bThisFlipGravity);
-	}
-}
-
-void AGravityCharacter::ClickInteract_Implementation()
-{
-	UE_LOG(LogTemp, Warning, TEXT("ClickInteract: %s"), *this->GetName());
-}
-
-void AGravityCharacter::ResetClickInteract_Implementation()
-{
-	UE_LOG(LogTemp, Warning, TEXT("ResetClickInteract: %s"), *this->GetName());
-}
-
-void AGravityCharacter::SetFlipGravity(bool bNewGravity)
-{
-	bFlipGravity = bNewGravity;
-	OnGravityChanged.Broadcast(bNewGravity);
-}
+//bool AGravityCharacter::GetFlipGravity()
+//{
+//	return bFlipGravity;
+//}
+//
+//void AGravityCharacter::SetFlipGravity(bool bNewGravity)
+//{
+//	bFlipGravity = bNewGravity;
+//	OnGravityChanged.Broadcast(bNewGravity);
+//}
 
 void AGravityCharacter::BeginPlay()
 {
@@ -136,16 +132,16 @@ void AGravityCharacter::Tick(float DeltaTime)
 	CameraBoom->SetWorldRotation(TargetRotation);
 
 
-	// Handle interactions
-	if (Interactable != nullptr)
-	{
-		Interactable->HideInteractionWidget();
-	}
-	Interactable = GetClosestInteracterbleActor();
-	if (Interactable != nullptr)
-	{
-		Interactable->ShowInteractionWidget();
-	}
+	//// Handle interactions
+	//if (ApproachInteractable != nullptr)
+	//{
+	//	ApproachInteractable->HideInteractionWidget();
+	//}
+	//ApproachInteractable = TryGetApproachInteractableComp();
+	//if (ApproachInteractable != nullptr)
+	//{
+	//	ApproachInteractable->ShowInteractionWidget();
+	//}
 }
 
 void AGravityCharacter::MoveRight(float Val)
@@ -177,26 +173,28 @@ void AGravityCharacter::SetGravityTarget(FVector NewGravityPoint)
 // Interact
 void AGravityCharacter::OnInteract()
 {
-	if (Interactable != nullptr)
+	ApproachInteractableComp = TryGetApproachInteractableComp();
+	if (ApproachInteractableComp != nullptr)
 	{
-		Interactable->Interact();
+		IApproachInteract::Execute_Interact(ApproachInteractableComp);
 	}
 }
 
-IInteractionInterface* AGravityCharacter::GetClosestInteracterbleActor()
+UActorComponent* AGravityCharacter::TryGetApproachInteractableComp()
 {
 	TArray<AActor*> OverlappingActors;
 	InteractBox->GetOverlappingActors(OverlappingActors);
 	if (OverlappingActors.Num() == 0)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("OverlappingActors : 0"));
 		return nullptr;
 	}
 
-	if (Interactable != nullptr)
-	{
-		Interactable->HideInteractionWidget();
-		Interactable = nullptr;
-	}
+	//if (ApproachInteractable != nullptr)
+	//{
+	//	ApproachInteractable->HideInteractionWidget();
+	//	ApproachInteractable = nullptr;
+	//}
 
 	// Get the closest actor among the Overlapping actors
 	AActor* ClosestActor = OverlappingActors[0];
@@ -208,7 +206,7 @@ IInteractionInterface* AGravityCharacter::GetClosestInteracterbleActor()
 		}
 	}
 
-	return Cast<IInteractionInterface>(ClosestActor);
+	return GetComponent<UApproachInteract>(ClosestActor);
 }
 
 void AGravityCharacter::OnClick()
@@ -239,14 +237,16 @@ void AGravityCharacter::OnClick()
 			// Reset ClickInteract
 			if (CurrentClickFocus != nullptr)
 			{
-				CurrentClickFocus->ResetClickInteract();
+				IClickInteract::Execute_ResetClickInteract(CurrentClickFocus);
 				CurrentClickFocus = nullptr;
 			}
 			return;
 		}
 
 		// GravitySwap
-		TScriptInterface<IGravitySwappable> GravitySwappable = TScriptInterface<IGravitySwappable>(HitActor);
+		UActorComponent* GravitySwappable = GetComponent<UGravitySwappable>(HitActor);
+
+		//TScriptInterface<IGravitySwappable> GravitySwappable = TScriptInterface<IGravitySwappable>(HitActor);
 		if (GravitySwappable != nullptr)
 		{
 			if (FirstFocus == nullptr)
@@ -265,9 +265,14 @@ void AGravityCharacter::OnClick()
 			{
 				// Selected two different objects.
 				UE_LOG(LogTemp, Warning, TEXT("Different object is clicked. Swap gravity & Reset FirstFocus"));
-				if ((FirstFocus->CanSwap(GravitySwappable)) == true)
+
+				UGravitySwapComponent* FirstFocusComp = Cast<UGravitySwapComponent>(FirstFocus);
+				UGravitySwapComponent* GravitySwappableComp = Cast<UGravitySwapComponent>(GravitySwappable);
+
+				if (FirstFocusComp->GetFlipGravity() != GravitySwappableComp->GetFlipGravity())
 				{
-					FirstFocus->SwapGravity(GravitySwappable);
+					FirstFocusComp->SetFlipGravity(!FirstFocusComp->GetFlipGravity());
+					GravitySwappableComp->SetFlipGravity(!GravitySwappableComp->GetFlipGravity());
 				}
 
 				FirstFocus = nullptr;
@@ -280,33 +285,61 @@ void AGravityCharacter::OnClick()
 		}
 
 		// ClickInteract
-		IClickInteract* ClickInteractable = Cast<IClickInteract>(HitActor);
+		UActorComponent* ClickInteractable = GetComponent<UClickInteract>(HitActor);
 		if (ClickInteractable != nullptr)
 		{
 			// When player clicks the second clickable object
 			if (CurrentClickFocus != nullptr)
 			{
-				CurrentClickFocus->ResetClickInteract();
-				ClickInteractable->ResetClickInteract();
+				IClickInteract::Execute_ResetClickInteract(CurrentClickFocus);
+				IClickInteract::Execute_ResetClickInteract(ClickInteractable);
 				CurrentClickFocus = nullptr;
 				return;
 			}
 
 			CurrentClickFocus = ClickInteractable;
-			CurrentClickFocus->ClickInteract();
+			IClickInteract::Execute_ClickInteract(CurrentClickFocus);
 		}
 		else
 		{
-			if (CurrentClickFocus)	CurrentClickFocus->ResetClickInteract();
-
+			if (CurrentClickFocus)
+			{
+				IClickInteract::Execute_ResetClickInteract(CurrentClickFocus);
+			}
 			CurrentClickFocus = nullptr;
 		}
 
-		IInteractionInterface* InteractableActor = Cast<IInteractionInterface>(HitActor);
-		if (InteractableActor != nullptr)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Interactable object is clicked"));
-		}
+
+
+
+
+		//IClickInteract* ClickInteractable = Cast<IClickInteract>(HitActor);
+		//if (ClickInteractable != nullptr)
+		//{
+		//	// When player clicks the second clickable object
+		//	if (CurrentClickFocus != nullptr)
+		//	{
+		//		CurrentClickFocus->ResetClickInteract();
+		//		ClickInteractable->ResetClickInteract();
+		//		CurrentClickFocus = nullptr;
+		//		return;
+		//	}
+
+		//	CurrentClickFocus = ClickInteractable;
+		//	CurrentClickFocus->ClickInteract();
+		//}
+		//else
+		//{
+		//	if (CurrentClickFocus)	CurrentClickFocus->ResetClickInteract();
+
+		//	CurrentClickFocus = nullptr;
+		//}
+
+		//IApproachInteract* ApproachInteractableActor = Cast<IApproachInteract>(HitActor);
+		//if (ApproachInteractableActor != nullptr)
+		//{
+		//	UE_LOG(LogTemp, Warning, TEXT("ApproachInteractable object is clicked"));
+		//}
 	}
 	else
 	{
@@ -317,7 +350,7 @@ void AGravityCharacter::OnClick()
 		// Reset ClickInteract
 		if (CurrentClickFocus != nullptr)
 		{
-			CurrentClickFocus->ResetClickInteract();
+			IClickInteract::Execute_ResetClickInteract(CurrentClickFocus);
 			CurrentClickFocus = nullptr;
 		}
 	}
