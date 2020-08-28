@@ -39,10 +39,6 @@ public:
 	// Sets default values for this character's properties
 	AGravityCharacter(const FObjectInitializer& ObjectInitializer);
 
-	// Delegates
-	//UPROPERTY(BlueprintAssignable)
-	//FOnGravityChanged OnGravityChanged;
-
 	// IGravitySwappable
 	virtual bool GetFlipGravity() const override;
 	virtual void SetFlipGravity(bool bNewGravity) override;
@@ -99,7 +95,6 @@ protected:
 	// Approach Interact
 	void OnInteract();
 	void OnInteractReleased();
-
 	UActorComponent* TryGetApproachInteractableComp();
 	UActorComponent* ApproachInteractableComp = nullptr;
 

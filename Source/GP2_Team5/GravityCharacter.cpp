@@ -61,17 +61,6 @@ AGravityCharacter::AGravityCharacter(const FObjectInitializer& ObjectInitializer
 	InteractBox->SetupAttachment(RootComponent);
 }
 
-bool AGravityCharacter::GetFlipGravity() const
-{
-	return bFlipGravity;
-}
-
-void AGravityCharacter::SetFlipGravity(bool bNewGravity)
-{
-	bFlipGravity = bNewGravity;
-	//OnGravityChanged.Broadcast(bNewGravity);
-}
-
 void AGravityCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -129,6 +118,16 @@ void AGravityCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AGravityCharacter::OnInteract);
 	PlayerInputComponent->BindAction("Interact", IE_Released, this, &AGravityCharacter::OnInteractReleased);
 	PlayerInputComponent->BindAction("LeftMouseButton", IE_Released, this, &AGravityCharacter::OnClick);
+}
+
+bool AGravityCharacter::GetFlipGravity() const
+{
+	return bFlipGravity;
+}
+
+void AGravityCharacter::SetFlipGravity(bool bNewGravity)
+{
+	bFlipGravity = bNewGravity;
 }
 
 void AGravityCharacter::SetGravityTarget(FVector NewGravityPoint)

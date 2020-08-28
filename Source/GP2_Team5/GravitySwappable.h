@@ -6,8 +6,6 @@
 #include "UObject/Interface.h"
 #include "GravitySwappable.generated.h"
 
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGravityChanged, bool, bInverted);
-
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, BlueprintType, meta=(CannotImplementInterfaceInBlueprint))
 class UGravitySwappable : public UInterface
@@ -31,16 +29,4 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void SetFlipGravity(bool bNewGravity) = 0;
-
-	////UFUNCTION(BlueprintCallable)
-	////virtual bool CanSwap(TScriptInterface<IGravitySwappable> Other) = 0 ;
-
-	////UFUNCTION(BlueprintCallable)
-	////virtual void SwapGravity(TScriptInterface<IGravitySwappable> Other) = 0;
-
-	////UFUNCTION(BlueprintCallable)
-	////virtual bool GetFlipGravity() = 0;
-
-	////UFUNCTION(BlueprintCallable)
-	////virtual void SetFlipGravity(bool bNewGravity) = 0;
 };

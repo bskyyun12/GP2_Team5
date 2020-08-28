@@ -14,7 +14,6 @@ UGravitySwapComponent::UGravitySwapComponent()
 	// ...
 }
 
-
 // Called when the game starts
 void UGravitySwapComponent::BeginPlay()
 {
@@ -30,7 +29,6 @@ void UGravitySwapComponent::BeginPlay()
 		break;
 	}
 }
-
 
 // Called every frame
 void UGravitySwapComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
