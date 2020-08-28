@@ -71,35 +71,8 @@ bool AGravityCharacter::GetFlipGravity() const
 void AGravityCharacter::SetFlipGravity(bool bNewGravity)
 {
 	bFlipGravity = bNewGravity;
-	OnGravityChanged.Broadcast(bNewGravity);
+	//OnGravityChanged.Broadcast(bNewGravity);
 }
-
-//bool AGravityCharacter::CanSwap(TScriptInterface<IGravitySwappable> Other)
-//{
-//	return true;
-//}
-//
-//void AGravityCharacter::SwapGravity(TScriptInterface<IGravitySwappable> Other)
-//{
-//	bool bThisFlipGravity = GetFlipGravity();
-//	if (Other)
-//	{
-//		SetFlipGravity(Other->GetFlipGravity());
-//		Other->SetFlipGravity(bThisFlipGravity);
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("Flip gravity with null on objet : %s"), *this->GetName());
-//		SetFlipGravity(!bThisFlipGravity);
-//	}
-//}
-
-//bool AGravityCharacter::GetFlipGravity()
-//{
-//	return bFlipGravity;
-//}
-//
-
 
 void AGravityCharacter::BeginPlay()
 {
@@ -137,18 +110,6 @@ void AGravityCharacter::Tick(float DeltaTime)
 	FRotator TargetRotation = UKismetMathLibrary::MakeRotationFromAxes(ForwardVector, RightVector, UpVector);
 	TargetRotation = FMath::RInterpTo(CameraBoom->GetComponentRotation(), TargetRotation, DeltaTime, 15);
 	CameraBoom->SetWorldRotation(TargetRotation);
-
-
-	//// Handle interactions
-	//if (ApproachInteractable != nullptr)
-	//{
-	//	ApproachInteractable->HideInteractionWidget();
-	//}
-	//ApproachInteractable = TryGetApproachInteractableComp();
-	//if (ApproachInteractable != nullptr)
-	//{
-	//	ApproachInteractable->ShowInteractionWidget();
-	//}
 }
 
 void AGravityCharacter::MoveRight(float Val)
@@ -326,38 +287,6 @@ void AGravityCharacter::OnClick()
 			}
 			CurrentClickFocus = nullptr;
 		}
-
-
-
-
-
-		//IClickInteract* ClickInteractable = Cast<IClickInteract>(HitActor);
-		//if (ClickInteractable != nullptr)
-		//{
-		//	// When player clicks the second clickable object
-		//	if (CurrentClickFocus != nullptr)
-		//	{
-		//		CurrentClickFocus->ResetClickInteract();
-		//		ClickInteractable->ResetClickInteract();
-		//		CurrentClickFocus = nullptr;
-		//		return;
-		//	}
-
-		//	CurrentClickFocus = ClickInteractable;
-		//	CurrentClickFocus->ClickInteract();
-		//}
-		//else
-		//{
-		//	if (CurrentClickFocus)	CurrentClickFocus->ResetClickInteract();
-
-		//	CurrentClickFocus = nullptr;
-		//}
-
-		//IApproachInteract* ApproachInteractableActor = Cast<IApproachInteract>(HitActor);
-		//if (ApproachInteractableActor != nullptr)
-		//{
-		//	UE_LOG(LogTemp, Warning, TEXT("ApproachInteractable object is clicked"));
-		//}
 	}
 	else
 	{
@@ -373,8 +302,6 @@ void AGravityCharacter::OnClick()
 		}
 	}
 }
-
-
 // End Interact
 //////////////////////////////////////////////////////////////////////////
 #pragma endregion Interaction

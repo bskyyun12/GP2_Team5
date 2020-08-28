@@ -41,12 +41,10 @@ public:
 	AGravityCharacter(const FObjectInitializer& ObjectInitializer);
 
 	// Delegates
-	UPROPERTY(BlueprintAssignable)
-	FOnGravityChanged OnGravityChanged;
+	//UPROPERTY(BlueprintAssignable)
+	//FOnGravityChanged OnGravityChanged;
 
 	// IGravitySwappable
-	//bool CanSwap(TScriptInterface<IGravitySwappable> Other);
-	//void SwapGravity(TScriptInterface<IGravitySwappable> Other);
 	virtual bool GetFlipGravity() const override;
 	virtual void SetFlipGravity(bool bNewGravity) override;
 
@@ -99,12 +97,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float ClickInteractRange = 700.f;
 
-	//IApproachInteract* ApproachInteractable = nullptr;
-
-	//TScriptInterface<IGravitySwappable> FirstFocus = nullptr;
-
-	//IClickInteract* CurrentClickFocus = nullptr;
-
 	// Approach Interact
 	void OnInteract();
 	void OnInteractReleased();
@@ -112,8 +104,10 @@ protected:
 	UActorComponent* TryGetApproachInteractableComp();
 	UActorComponent* ApproachInteractableComp = nullptr;
 
+	// Click focus
 	UActorComponent* CurrentClickFocus = nullptr;
 
+	// Swap focus
 	UActorComponent* FirstFocus = nullptr;
 
 	void OnClick();

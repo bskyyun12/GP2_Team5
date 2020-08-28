@@ -28,8 +28,8 @@ public:
 
 	// Delegates
 
-	UPROPERTY(BlueprintAssignable)
-	FOnGravityChanged OnGravityChanged;
+	//UPROPERTY(BlueprintAssignable)
+	//FOnGravityChanged OnGravityChanged;
 
 	// IGravitySwappable
 	//bool CanSwap(TScriptInterface<IGravitySwappable> Other);

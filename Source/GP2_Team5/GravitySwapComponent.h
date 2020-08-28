@@ -31,14 +31,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Gravity")
 	FOnGravityChanged OnFlipGravity;
 
-	//bool CanSwap(TScriptInterface<IGravitySwappable> Other);
-	//virtual bool CanSwap_Implementation(TScriptInterface<IGravitySwappable> Other);
-
-	//void SwapGravity(TScriptInterface<IGravitySwappable> Other);
-	//virtual void SwapGravity_Implementation(TScriptInterface<IGravitySwappable> Other);
-
 	virtual bool GetFlipGravity() const override;
-
 	virtual void SetFlipGravity(bool bNewGravity) override;
 
 protected:

@@ -6,7 +6,7 @@
 #include "UObject/Interface.h"
 #include "GravitySwappable.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGravityChanged, bool, bInverted);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGravityChanged, bool, bInverted);
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, BlueprintType, meta=(CannotImplementInterfaceInBlueprint))

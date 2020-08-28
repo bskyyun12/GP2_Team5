@@ -53,19 +53,7 @@ void UGravitySwapComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 			Mesh->AddForce(GravityDirection * force, NAME_None, true);
 		}
 	}
-	// ...
 }
-
-//bool UGravitySwapComponent::CanSwap_Implementation(TScriptInterface<IGravitySwappable> Other)
-//{
-//	return true;
-//}
-//
-//void UGravitySwapComponent::SwapGravity_Implementation(TScriptInterface<IGravitySwappable> Other)
-//{
-//
-//}
-//
 
 bool UGravitySwapComponent::GetFlipGravity() const
 {
