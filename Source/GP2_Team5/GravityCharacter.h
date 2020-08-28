@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "InteractionInterface.h"
 #include "ApproachInteract.h"
 #include "GravitySwappable.h"
 #include "ClickInteract.h"

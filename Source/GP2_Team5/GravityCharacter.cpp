@@ -9,8 +9,6 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "InteractionInterface.h"
-#include "GravityCube.h"
 #include "GravitySwappable.h"
 #include "ClickInteract.h"	
 #include "DrawDebugHelpers.h"
