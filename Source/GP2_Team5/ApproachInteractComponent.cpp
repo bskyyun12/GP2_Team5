@@ -6,11 +6,7 @@
 // Sets default values for this component's properties
 UApproachInteractComponent::UApproachInteractComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -18,9 +14,6 @@ UApproachInteractComponent::UApproachInteractComponent()
 void UApproachInteractComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
 }
 
 
@@ -28,8 +21,6 @@ void UApproachInteractComponent::BeginPlay()
 void UApproachInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
 
@@ -37,6 +28,11 @@ void UApproachInteractComponent::Interact_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("%s: Interact()"), *GetName());
 	OnInteract.Broadcast();
+}
+
+void UApproachInteractComponent::InteractReleased_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s: InteractReleased()"), *GetName());
 }
 
 void UApproachInteractComponent::ShowInteractionWidget()

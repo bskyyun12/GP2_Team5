@@ -24,6 +24,8 @@ class GP2_TEAM5_API IApproachInteract
 public:
 	UFUNCTION(BlueprintNativeEvent)
 	void Interact();
+	UFUNCTION(BlueprintNativeEvent)
+	void InteractReleased();
 	virtual void ShowInteractionWidget();
 	virtual void HideInteractionWidget();
 };

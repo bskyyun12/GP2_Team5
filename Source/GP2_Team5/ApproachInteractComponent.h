@@ -8,7 +8,7 @@
 #include "ApproachInteractComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GP2_TEAM5_API UApproachInteractComponent : public UActorComponent, public IApproachInteract
 {
 	GENERATED_BODY()
@@ -32,6 +32,9 @@ public:
 
 	void Interact();
 	virtual void Interact_Implementation();
+
+	void InteractReleased();
+	virtual void InteractReleased_Implementation();
 
 	void ShowInteractionWidget() override;
 	void HideInteractionWidget() override;

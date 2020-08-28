@@ -31,7 +31,7 @@ class UGravityMovementComponent;
 
 
 UCLASS()
-class GP2_TEAM5_API AGravityCharacter : public ACharacter//, public IGravitySwappable
+class GP2_TEAM5_API AGravityCharacter : public ACharacter, public IGravitySwappable
 {
 	GENERATED_BODY()
 
@@ -41,14 +41,14 @@ public:
 	AGravityCharacter(const FObjectInitializer& ObjectInitializer);
 
 	// Delegates
-	//UPROPERTY(BlueprintAssignable)
-	//FOnGravityChanged OnGravityChanged;
+	UPROPERTY(BlueprintAssignable)
+	FOnGravityChanged OnGravityChanged;
 
 	// IGravitySwappable
 	//bool CanSwap(TScriptInterface<IGravitySwappable> Other);
 	//void SwapGravity(TScriptInterface<IGravitySwappable> Other);
-	//bool GetFlipGravity() override;
-	//void SetFlipGravity(bool bNewGravity) override;
+	virtual bool GetFlipGravity() const override;
+	virtual void SetFlipGravity(bool bNewGravity) override;
 
 
 protected: 
@@ -107,6 +107,8 @@ protected:
 
 	// Approach Interact
 	void OnInteract();
+	void OnInteractReleased();
+
 	UActorComponent* TryGetApproachInteractableComp();
 	UActorComponent* ApproachInteractableComp = nullptr;
 

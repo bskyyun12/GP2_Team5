@@ -63,6 +63,17 @@ AGravityCharacter::AGravityCharacter(const FObjectInitializer& ObjectInitializer
 	InteractBox->SetupAttachment(RootComponent);
 }
 
+bool AGravityCharacter::GetFlipGravity() const
+{
+	return bFlipGravity;
+}
+
+void AGravityCharacter::SetFlipGravity(bool bNewGravity)
+{
+	bFlipGravity = bNewGravity;
+	OnGravityChanged.Broadcast(bNewGravity);
+}
+
 //bool AGravityCharacter::CanSwap(TScriptInterface<IGravitySwappable> Other)
 //{
 //	return true;
@@ -88,11 +99,7 @@ AGravityCharacter::AGravityCharacter(const FObjectInitializer& ObjectInitializer
 //	return bFlipGravity;
 //}
 //
-//void AGravityCharacter::SetFlipGravity(bool bNewGravity)
-//{
-//	bFlipGravity = bNewGravity;
-//	OnGravityChanged.Broadcast(bNewGravity);
-//}
+
 
 void AGravityCharacter::BeginPlay()
 {
@@ -160,7 +167,8 @@ void AGravityCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGravityCharacter::MoveRight);
-	PlayerInputComponent->BindAction("Interact", IE_Released, this, &AGravityCharacter::OnInteract);
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AGravityCharacter::OnInteract);
+	PlayerInputComponent->BindAction("Interact", IE_Released, this, &AGravityCharacter::OnInteractReleased);
 	PlayerInputComponent->BindAction("LeftMouseButton", IE_Released, this, &AGravityCharacter::OnClick);
 }
 
@@ -178,6 +186,15 @@ void AGravityCharacter::OnInteract()
 	{
 		IApproachInteract::Execute_Interact(ApproachInteractableComp);
 	}
+}
+
+void AGravityCharacter::OnInteractReleased()
+{
+	if (ApproachInteractableComp != nullptr)
+	{
+		IApproachInteract::Execute_InteractReleased(ApproachInteractableComp);
+	}
+	ApproachInteractableComp = nullptr;
 }
 
 UActorComponent* AGravityCharacter::TryGetApproachInteractableComp()

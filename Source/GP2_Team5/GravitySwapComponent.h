@@ -37,9 +37,9 @@ public:
 	//void SwapGravity(TScriptInterface<IGravitySwappable> Other);
 	//virtual void SwapGravity_Implementation(TScriptInterface<IGravitySwappable> Other);
 
-	bool GetFlipGravity();
+	virtual bool GetFlipGravity() const override;
 
-	void SetFlipGravity(bool bNewGravity);
+	virtual void SetFlipGravity(bool bNewGravity) override;
 
 protected:
 

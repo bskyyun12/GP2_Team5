@@ -66,10 +66,12 @@ void UGravitySwapComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 //
 //}
 //
-bool UGravitySwapComponent::GetFlipGravity()
+
+bool UGravitySwapComponent::GetFlipGravity() const
 {
 	return bFlipGravity;
 }
+
 
 void UGravitySwapComponent::SetFlipGravity(bool bNewGravity)
 {
