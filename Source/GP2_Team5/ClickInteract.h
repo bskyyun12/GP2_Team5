@@ -22,6 +22,9 @@ class GP2_TEAM5_API IClickInteract
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void ClickInteract();
-	virtual void ResetClickInteract();
+	UFUNCTION(BlueprintNativeEvent)
+	void ClickInteract();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void ResetClickInteract();
 };

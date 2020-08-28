@@ -4,19 +4,33 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "InteractionInterface.h"
+#include "ApproachInteract.h"
 #include "GravitySwappable.h"
 #include "ClickInteract.h"
 #include "GravityCharacter.generated.h"
 
 
+template<class T>
+UActorComponent* GetComponent(AActor* Actor) 
+{	
+	// Get ClosestActor's components and see if one of them implements UApproachInteract
+	TArray<UActorComponent*> Components = Actor->GetComponentsByInterface(T::StaticClass());
+	for (UActorComponent* Comp : Components)
+	{
+		if (Comp->GetClass()->ImplementsInterface(T::StaticClass()))
+		{
+			return Comp;
+		}
+	}
+	return nullptr;
+}
 
 //--- forward declarations ---
 class UGravityMovementComponent;
 
 
 UCLASS()
-class GP2_TEAM5_API AGravityCharacter : public ACharacter, public IGravitySwappable, public IClickInteract
+class GP2_TEAM5_API AGravityCharacter : public ACharacter, public IGravitySwappable
 {
 	GENERATED_BODY()
 
@@ -25,25 +39,10 @@ public:
 	// Sets default values for this character's properties
 	AGravityCharacter(const FObjectInitializer& ObjectInitializer);
 
-	// Delegates
-	UPROPERTY(BlueprintAssignable)
-	FOnGravityChanged OnGravityChanged;
-
 	// IGravitySwappable
-	bool CanSwap(TScriptInterface<IGravitySwappable> Other) override;
-	void SwapGravity(TScriptInterface<IGravitySwappable> Other) override;
-	bool GetFlipGravity() override { return bFlipGravity; };
-	void SetFlipGravity(bool bNewGravity) override;
+	virtual bool GetFlipGravity() const override;
+	virtual void SetFlipGravity(bool bNewGravity) override;
 
-
-	// IClickInteract
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void ClickInteract() override;
-	virtual void ClickInteract_Implementation();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void ResetClickInteract() override;
-	virtual void ResetClickInteract_Implementation();
 
 protected: 
 	virtual void BeginPlay() override;
@@ -93,19 +92,19 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float ClickInteractRange = 700.f;
 
-	IInteractionInterface* Interactable = nullptr;
-
-	TScriptInterface<IGravitySwappable> FirstFocus = nullptr;
-
-	IClickInteract* CurrentClickFocus = nullptr;
-
+	// Approach Interact
 	void OnInteract();
+	void OnInteractReleased();
+	UActorComponent* TryGetApproachInteractableComp();
+	UActorComponent* ApproachInteractableComp = nullptr;
 
-	IInteractionInterface* GetClosestInteracterbleActor();
+	// Click focus
+	UActorComponent* CurrentClickFocus = nullptr;
+
+	// Swap focus
+	UActorComponent* FirstFocus = nullptr;
 
 	void OnClick();
-
-
 // Interaction
 ///////////////////////////////////////
 };
