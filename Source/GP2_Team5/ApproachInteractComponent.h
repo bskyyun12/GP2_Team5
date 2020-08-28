@@ -30,6 +30,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnInteractDelegate OnInteract;
 
+
+	UPROPERTY(BlueprintAssignable, Category = "Interaction")
+	FOnInteractDelegate OnInteractReleased;
+
 	void Interact();
 	virtual void Interact_Implementation();
 

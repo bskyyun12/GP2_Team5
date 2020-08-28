@@ -33,6 +33,7 @@ void UApproachInteractComponent::Interact_Implementation()
 void UApproachInteractComponent::InteractReleased_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("%s: InteractReleased()"), *GetName());
+	OnInteractReleased.Broadcast();
 }
 
 void UApproachInteractComponent::ShowInteractionWidget()

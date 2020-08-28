@@ -184,6 +184,7 @@ void AGravityCharacter::OnInteract()
 	ApproachInteractableComp = TryGetApproachInteractableComp();
 	if (ApproachInteractableComp != nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Interacts with : %s"), *ApproachInteractableComp->GetName());
 		IApproachInteract::Execute_Interact(ApproachInteractableComp);
 	}
 }
