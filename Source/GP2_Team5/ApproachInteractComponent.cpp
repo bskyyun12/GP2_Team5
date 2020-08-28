@@ -23,7 +23,6 @@ void UApproachInteractComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-
 void UApproachInteractComponent::Interact_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("%s: Interact()"), *GetName());
