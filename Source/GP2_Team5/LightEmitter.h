@@ -20,7 +20,8 @@ public:
 	bool SendLaserCCW(FVector Start, int Bounces);
 	bool SendLaserCW(FVector Start, int Bounces);
 
-	bool SendLaserStraight(FVector Start, FVector Direction, int Bounces);
+	bool SendLaserUp(FVector Start, int Bounces);
+	bool SendLaserDown(FVector Start, int Bounces);
 
 protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite)
