@@ -13,7 +13,6 @@
 template<class T>
 UActorComponent* GetComponent(AActor* Actor) 
 {	
-	// Get ClosestActor's components and see if one of them implements UApproachInteract
 	TArray<UActorComponent*> Components = Actor->GetComponentsByInterface(T::StaticClass());
 	for (UActorComponent* Comp : Components)
 	{
@@ -27,7 +26,6 @@ UActorComponent* GetComponent(AActor* Actor)
 
 //--- forward declarations ---
 class UGravityMovementComponent;
-
 
 UCLASS()
 class GP2_TEAM5_API AGravityCharacter : public ACharacter, public IGravitySwappable
@@ -84,12 +82,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
 
-///////////////////////////////////////
-// Interaction
-	UPROPERTY(EditAnywhere)
+#pragma region Interaction
+
+	UPROPERTY(EditAnywhere, Category = "Interaction")
 	class UBoxComponent* InteractBox;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Interaction")
 	float ClickInteractRange = 700.f;
 
 	// Approach Interact
@@ -98,13 +96,29 @@ protected:
 	UActorComponent* TryGetApproachInteractableComp();
 	UActorComponent* ApproachInteractableComp = nullptr;
 
-	// Click focus
-	UActorComponent* CurrentClickFocus = nullptr;
-
-	// Swap focus
-	UActorComponent* FirstFocus = nullptr;
-
+	// Click Interact
 	void OnClick();
-// Interaction
-///////////////////////////////////////
+	UActorComponent* CurrentClickFocus = nullptr;
+	void ResetClickInteract(UActorComponent*& FocusToReset);
+
+	// 
+	UPROPERTY(EditAnywhere, Category = "Interaction")
+	bool bIsGrabbing = false;
+
+	UFUNCTION(BlueprintPure, Category = "Interaction")
+	bool HasCurrentFocus() {	return CurrentClickFocus != nullptr;	}
+
+	UFUNCTION(BlueprintPure, Category = "Interaction")
+	bool IsJumping();
+
+
+	/// Check list
+	/// while grabbing -> NO: click interact / approach interact / jump
+	/// while having first click focus -> NO: move, jump, approach interact -> reset first focus
+	/// while jumping -> NO: grab / click interact / approach interact(?)
+	/// 
+	/// </summary>
+
+#pragma endregion
+
 };

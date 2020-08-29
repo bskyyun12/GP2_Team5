@@ -136,9 +136,13 @@ void AGravityCharacter::SetGravityTarget(FVector NewGravityPoint)
 }
 
 #pragma region Interaction
-// Interact
+// Approach Interact
 void AGravityCharacter::OnInteract()
 {
+	if (IsJumping() || bIsGrabbing)
+	{
+		return;
+	}
 	ApproachInteractableComp = TryGetApproachInteractableComp();
 	if (ApproachInteractableComp != nullptr)
 	{
@@ -185,9 +189,17 @@ UActorComponent* AGravityCharacter::TryGetApproachInteractableComp()
 	return GetComponent<UApproachInteract>(ClosestActor);
 }
 
+// Click Interact
 void AGravityCharacter::OnClick()
 {
+	if (IsJumping() || bIsGrabbing)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot ClickInteract while jumping nor grabbing. Resetting CurrentClickFocus"));
+		ResetClickInteract(CurrentClickFocus);
+		return;
+	}
 
+	// Define what to detect by left mouse click event
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_PhysicsBody));
@@ -196,109 +208,90 @@ void AGravityCharacter::OnClick()
 	FHitResult Hit;
 	GetWorld()->GetFirstPlayerController()->GetHitResultUnderCursorForObjects(ObjectTypes, true, Hit);
 
-	if (Hit.bBlockingHit)
+	if (Hit.bBlockingHit == false)	// Hit Nothing
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hit Nothing. Reset CurrentClickFocus"));
+		ResetClickInteract(CurrentClickFocus);
+	}
+	else // Hit something
 	{
 		AActor* HitActor = Hit.GetActor();
 		UE_LOG(LogTemp, Warning, TEXT("Clicked: %s"), *HitActor->GetName());
 
+		// Too far to interact
 		if (GetDistanceTo(HitActor) > ClickInteractRange)
 		{
-			// Too far to interact
-			UE_LOG(LogTemp, Warning, TEXT("Too far to interact! Reset FirstFocus"));
+			//ResetClickInteract(FirstFocus);
+			UE_LOG(LogTemp, Warning, TEXT("Too far to interact! Reset FirstFocus, CurrentClickFocus"));
+			ResetClickInteract(CurrentClickFocus);
+
+			// Debug ClickInteractRange
 			DrawDebugSphere(GetWorld(), GetActorLocation(), ClickInteractRange, 50, FColor::Red, false, 1);
-
-			// Reset GravitySwap
-			FirstFocus = nullptr;
-
-			// Reset ClickInteract
-			if (CurrentClickFocus != nullptr)
-			{
-				IClickInteract::Execute_ResetClickInteract(CurrentClickFocus);
-				CurrentClickFocus = nullptr;
-			}
 			return;
 		}
 
-		// GravitySwap
-		UActorComponent* GravitySwappable = GetComponent<UGravitySwappable>(HitActor);
-
-		//TScriptInterface<IGravitySwappable> GravitySwappable = TScriptInterface<IGravitySwappable>(HitActor);
-		if (GravitySwappable != nullptr)
+		// Try getting a component inherited from UClickInteract
+		UActorComponent* NewClickFocus = GetComponent<UClickInteract>(HitActor);
+		if (NewClickFocus == nullptr) 	// Clicked a Non-ClickInteractable
 		{
-			if (FirstFocus == nullptr)
+			ResetClickInteract(CurrentClickFocus);
+			return;
+		}
+		else // Clicked a ClickInteractable
+		{
+			if (CurrentClickFocus == nullptr)	// CurrentClickFocus is null
 			{
-				// Set FirstFocus
-				UE_LOG(LogTemp, Warning, TEXT("FirstFocus is null. Setting FirstFocus..."));
-				FirstFocus = GravitySwappable;
+				CurrentClickFocus = NewClickFocus;
+				IClickInteract::Execute_ClickInteract(CurrentClickFocus);
+				UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is null. New CurrentClickFocus: %s"), *CurrentClickFocus->GetName());
 			}
-			else if (FirstFocus == GravitySwappable)
+			else if (CurrentClickFocus == NewClickFocus)	// Clicked the same object
 			{
-				// Selected the same object.
-				UE_LOG(LogTemp, Warning, TEXT("Same object is clicked. Reset FirstFocus"));
-				FirstFocus = nullptr;
+				UE_LOG(LogTemp, Warning, TEXT("Clicked the same object. Reset CurrentClickFocus"));
+				ResetClickInteract(CurrentClickFocus);
 			}
-			else if (FirstFocus != GravitySwappable)
+			else	// Clicked two different objects
 			{
-				// Selected two different objects.
-				UE_LOG(LogTemp, Warning, TEXT("Different object is clicked. Swap gravity & Reset FirstFocus"));
+				UE_LOG(LogTemp, Warning, TEXT("Clicked two different objects. Reset CurrentClickFocus and NewClickFocus"));
 
-				UGravitySwapComponent* FirstFocusComp = Cast<UGravitySwapComponent>(FirstFocus);
-				UGravitySwapComponent* GravitySwappableComp = Cast<UGravitySwapComponent>(GravitySwappable);
+				// Try casting to UGravitySwapComponent
+				UGravitySwapComponent* CurrentClickFocusComp = Cast<UGravitySwapComponent>(GetComponent<UGravitySwappable>(CurrentClickFocus->GetOwner()));
+				UGravitySwapComponent* NewClickFocusComp = Cast<UGravitySwapComponent>(GetComponent<UGravitySwappable>(NewClickFocus->GetOwner()));
 
-				if (FirstFocusComp->GetFlipGravity() != GravitySwappableComp->GetFlipGravity())
+				// if both has UGravitySwapComponent
+				if (CurrentClickFocusComp != nullptr && NewClickFocusComp != nullptr)
 				{
-					FirstFocusComp->SetFlipGravity(!FirstFocusComp->GetFlipGravity());
-					GravitySwappableComp->SetFlipGravity(!GravitySwappableComp->GetFlipGravity());
+					// if both has different gravity direction
+					if (CurrentClickFocusComp->GetFlipGravity() != NewClickFocusComp->GetFlipGravity())
+					{
+						// Flip gravity for both
+						UE_LOG(LogTemp, Warning, TEXT("Swap gravity"));
+						CurrentClickFocusComp->SetFlipGravity(!CurrentClickFocusComp->GetFlipGravity());
+						NewClickFocusComp->SetFlipGravity(!NewClickFocusComp->GetFlipGravity());
+					}
 				}
 
-				FirstFocus = nullptr;
+				ResetClickInteract(CurrentClickFocus);
+				ResetClickInteract(NewClickFocus);
 			}
-		}
-		else // IGravitySwappable is nullptr
-		{
-			FirstFocus = nullptr;
-			UE_LOG(LogTemp, Warning, TEXT("Not IGravitySwappable. Reset FirstFocus"));
-		}
-
-		// ClickInteract
-		UActorComponent* ClickInteractable = GetComponent<UClickInteract>(HitActor);
-		if (ClickInteractable != nullptr)
-		{
-			// When player clicks the second clickable object
-			if (CurrentClickFocus != nullptr)
-			{
-				IClickInteract::Execute_ResetClickInteract(CurrentClickFocus);
-				IClickInteract::Execute_ResetClickInteract(ClickInteractable);
-				CurrentClickFocus = nullptr;
-				return;
-			}
-
-			CurrentClickFocus = ClickInteractable;
-			IClickInteract::Execute_ClickInteract(CurrentClickFocus);
-		}
-		else
-		{
-			if (CurrentClickFocus)
-			{
-				IClickInteract::Execute_ResetClickInteract(CurrentClickFocus);
-			}
-			CurrentClickFocus = nullptr;
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Hit Nothing. Reset FirstFocus"));
-		// Reset GravitySwap
-		FirstFocus = nullptr;
-
-		// Reset ClickInteract
-		if (CurrentClickFocus != nullptr)
-		{
-			IClickInteract::Execute_ResetClickInteract(CurrentClickFocus);
-			CurrentClickFocus = nullptr;
 		}
 	}
 }
+
+void AGravityCharacter::ResetClickInteract(UActorComponent*& FocusToReset)
+{
+	if (FocusToReset == nullptr) { return; }
+	if (FocusToReset->Implements<UClickInteract>() == false) { return; }
+
+	IClickInteract::Execute_ResetClickInteract(FocusToReset);
+	FocusToReset = nullptr;
+}
+
+bool AGravityCharacter::IsJumping()
+{
+	return CachedGravityMovementyCmp->IsFalling();
+}
+
 // End Interact
 //////////////////////////////////////////////////////////////////////////
 #pragma endregion Interaction
