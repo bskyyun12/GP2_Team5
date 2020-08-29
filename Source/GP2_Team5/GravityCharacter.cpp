@@ -204,6 +204,7 @@ void AGravityCharacter::OnClick()
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_PhysicsBody));
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel1));	// Interaction
+	ObjectTypes.Add(ObjectTypeQuery10);	// Pushbable are always interactables
 
 	FHitResult Hit;
 	GetWorld()->GetFirstPlayerController()->GetHitResultUnderCursorForObjects(ObjectTypes, true, Hit);
