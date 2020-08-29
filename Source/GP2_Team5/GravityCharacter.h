@@ -63,17 +63,17 @@ protected:
 protected:
 	UGravityMovementComponent* CachedGravityMovementyCmp = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Gravity")
+	UPROPERTY(EditAnywhere, Category = "GravityCharacter|Gravity")
 	FVector GravityPoint {};
 
 	/* The rate at which gravity changes from old to new target */
-	UPROPERTY(EditAnywhere, Category = "Gravity")
+	UPROPERTY(EditAnywhere, Category = "GravityCharacter|Gravity")
 	float GravityChangeSpeed = 25.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gravity")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Gravity")
 	bool bFlipGravity = false;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Camera")
+	UPROPERTY(EditDefaultsOnly, Category = "GravityCharacter|Camera")
 	bool bRotateCameraToPlayer = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -82,35 +82,38 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
 
+#pragma region Jump
+
+	void Jump();
+
+	UFUNCTION(BlueprintPure, Category = "GravityCharacter|Jump")
+	bool IsJumping();
+
+#pragma endregion
+
+
 #pragma region Interaction
 
-	UPROPERTY(EditAnywhere, Category = "Interaction")
+	UPROPERTY(EditAnywhere, Category = "GravityCharacter|Interaction")
 	class UBoxComponent* InteractBox;
 
-	UPROPERTY(EditAnywhere, Category = "Interaction")
+	UPROPERTY(EditAnywhere, Category = "GravityCharacter|Interaction")
 	float ClickInteractRange = 700.f;
 
 	// Approach Interact
-	void OnInteract();
-	void OnInteractReleased();
+	void OnApproachInteract();
+	void OnApproachInteractReleased();
 	UActorComponent* TryGetApproachInteractableComp();
 	UActorComponent* ApproachInteractableComp = nullptr;
 
 	// Click Interact
-	void OnClick();
+	void OnClickInteract();
 	UActorComponent* CurrentClickFocus = nullptr;
 	void ResetClickInteract(UActorComponent*& FocusToReset);
 
 	// 
-	UPROPERTY(EditAnywhere, Category = "Interaction")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
 	bool bIsGrabbing = false;
-
-	UFUNCTION(BlueprintPure, Category = "Interaction")
-	bool HasCurrentFocus() {	return CurrentClickFocus != nullptr;	}
-
-	UFUNCTION(BlueprintPure, Category = "Interaction")
-	bool IsJumping();
-
 
 	/// Check list
 	/// while grabbing -> NO: click interact / approach interact / jump
@@ -120,5 +123,4 @@ protected:
 	/// </summary>
 
 #pragma endregion
-
 };

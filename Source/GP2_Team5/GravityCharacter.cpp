@@ -101,23 +101,28 @@ void AGravityCharacter::Tick(float DeltaTime)
 
 void AGravityCharacter::MoveRight(float Val)
 {
+	if (Val == 0) { return; }
+
 	// Add movement with consideration to the direction of camera
 	FVector LocalMove{ 0.0f, 1.0f, 0.0f };
 	FQuat CameraRotation = CameraBoom->GetComponentRotation().Quaternion();
 	FVector TranslatedMove = CameraRotation * LocalMove;
 	TranslatedMove.X = 0.0f;
 	AddMovementInput(TranslatedMove, Val);
+
+	// Reset CurrentClickFocus
+	ResetClickInteract(CurrentClickFocus);
 }
 
 void AGravityCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// set up gameplay key bindings
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AGravityCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGravityCharacter::MoveRight);
-	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AGravityCharacter::OnInteract);
-	PlayerInputComponent->BindAction("Interact", IE_Released, this, &AGravityCharacter::OnInteractReleased);
-	PlayerInputComponent->BindAction("LeftMouseButton", IE_Released, this, &AGravityCharacter::OnClick);
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AGravityCharacter::OnApproachInteract);
+	//PlayerInputComponent->BindAction("Interact", IE_Released, this, &AGravityCharacter::OnInteractReleased);
+	PlayerInputComponent->BindAction("LeftMouseButton", IE_Released, this, &AGravityCharacter::OnClickInteract);
 }
 
 bool AGravityCharacter::GetFlipGravity() const
@@ -135,14 +140,39 @@ void AGravityCharacter::SetGravityTarget(FVector NewGravityPoint)
 	GravityPoint = NewGravityPoint;
 }
 
+#pragma region Jump
+
+void AGravityCharacter::Jump()
+{
+	if (bIsGrabbing) { return; }
+	ResetClickInteract(CurrentClickFocus);
+
+	ACharacter::Jump();
+}
+
+bool AGravityCharacter::IsJumping()
+{
+	return CachedGravityMovementyCmp->IsFalling();
+}
+
+#pragma endregion
+
 #pragma region Interaction
 // Approach Interact
-void AGravityCharacter::OnInteract()
+void AGravityCharacter::OnApproachInteract()
 {
+	// return if the player is currently jumping or grabbing something
 	if (IsJumping() || bIsGrabbing)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot ApproachInteract while jumping nor grabbing. Calling OnInteractReleased"));
+		OnApproachInteractReleased();
 		return;
 	}
+
+	// Reset CurrentClickFocus
+	ResetClickInteract(CurrentClickFocus);
+
+	// Try to get a ApproachInteractableComponent and execute its Interact() method
 	ApproachInteractableComp = TryGetApproachInteractableComp();
 	if (ApproachInteractableComp != nullptr)
 	{
@@ -151,7 +181,7 @@ void AGravityCharacter::OnInteract()
 	}
 }
 
-void AGravityCharacter::OnInteractReleased()
+void AGravityCharacter::OnApproachInteractReleased()
 {
 	if (ApproachInteractableComp != nullptr)
 	{
@@ -190,7 +220,7 @@ UActorComponent* AGravityCharacter::TryGetApproachInteractableComp()
 }
 
 // Click Interact
-void AGravityCharacter::OnClick()
+void AGravityCharacter::OnClickInteract()
 {
 	if (IsJumping() || bIsGrabbing)
 	{
@@ -231,7 +261,7 @@ void AGravityCharacter::OnClick()
 			return;
 		}
 
-		// Try getting a component inherited from UClickInteract
+		// Try getting a component with a UClickInteract interface
 		UActorComponent* NewClickFocus = GetComponent<UClickInteract>(HitActor);
 		if (NewClickFocus == nullptr) 	// Clicked a Non-ClickInteractable
 		{
@@ -287,12 +317,6 @@ void AGravityCharacter::ResetClickInteract(UActorComponent*& FocusToReset)
 	IClickInteract::Execute_ResetClickInteract(FocusToReset);
 	FocusToReset = nullptr;
 }
-
-bool AGravityCharacter::IsJumping()
-{
-	return CachedGravityMovementyCmp->IsFalling();
-}
-
 // End Interact
 //////////////////////////////////////////////////////////////////////////
 #pragma endregion Interaction
