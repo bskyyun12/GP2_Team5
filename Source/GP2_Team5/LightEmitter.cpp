@@ -6,12 +6,9 @@
 
 #include "DrawDebugHelpers.h"
 
-// Sets default values
 ALightEmitter::ALightEmitter()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
@@ -45,8 +42,6 @@ bool ALightEmitter::SendLaserCCW(FVector Start, int Bounces)
 
 	auto angle = FMath::Atan2(Start.Y, Start.Z);
 
-	
-
 	for (float i = angle; i < 1.9F * PI + angle; i += QuantizationLevel)
 	{
 		const float StartY = FMath::Sin(i) * DistanceFromCenter;
@@ -57,13 +52,12 @@ bool ALightEmitter::SendLaserCCW(FVector Start, int Bounces)
 		const FVector StartPoint = { 0.0F, StartY, StartZ };
 		const FVector EndPoint = { 0.0F, EndY, EndZ };
 
-		DrawDebugLine(GetWorld(), StartPoint, EndPoint, FColor(255, 0, 0), false, 0.1f, 0, 3.f);
 		FHitResult Hit;
 		bool bHitSomething = GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECollisionChannel::ECC_Visibility);
 		if (bHitSomething)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Send CCW hit something"));
-
+			DrawDebugLine(GetWorld(), StartPoint, Hit.ImpactPoint, FColor(255, 0, 0), false, 0.1f, 0, 3.f);
+			
 			FVector Incidence = (StartPoint - EndPoint).GetSafeNormal();
 
 			FQuat Rot = FQuat::FindBetweenNormals(Incidence, Hit.Normal);
@@ -72,6 +66,7 @@ bool ALightEmitter::SendLaserCCW(FVector Start, int Bounces)
 			return SendLaserStraight(Hit.ImpactPoint, OutVector, Bounces + 1);
 
 		}
+		DrawDebugLine(GetWorld(), StartPoint, EndPoint, FColor(255, 0, 0), false, 0.1f, 0, 3.f);
 	}
 	return false;
 }
@@ -95,20 +90,20 @@ bool ALightEmitter::SendLaserCW(FVector Start, int Bounces)
 		const FVector StartPoint = { 0.0F, StartY, StartZ };
 		const FVector EndPoint = { 0.0F, EndY, EndZ };
 
-		DrawDebugLine(GetWorld(), StartPoint, EndPoint, FColor(255, 0, 0), false, 0.1f, 0, 3.f);
 		FHitResult Hit;
 		bool bHitSomething = GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECollisionChannel::ECC_Visibility);
 		if (bHitSomething)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Send CW hit something"));
+			DrawDebugLine(GetWorld(), StartPoint, Hit.ImpactPoint, FColor(255, 0, 0), false, 0.1f, 0, 3.f);
+			
 			FVector Incidence = (StartPoint - EndPoint).GetSafeNormal();
 
 			FQuat Rot = FQuat::FindBetweenNormals(Incidence , Hit.Normal);
 			FVector OutVector = Rot * Hit.Normal;
 
 			return SendLaserStraight(Hit.ImpactPoint, OutVector, Bounces + 1);
-
 		}
+		DrawDebugLine(GetWorld(), StartPoint, EndPoint, FColor(255, 0, 0), false, 0.1f, 0, 3.f);
 	}
 	return false;
 }
@@ -118,7 +113,6 @@ bool ALightEmitter::SendLaserStraight(FVector Start, FVector Direction, int Boun
 	if (Bounces > MaxBounces) return false;
 
 	FVector End = Start + 1000.F * Direction;
-
 
 	FHitResult Hit;
 	bool bHitSomething = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECollisionChannel::ECC_Visibility);
@@ -140,62 +134,3 @@ bool ALightEmitter::SendLaserStraight(FVector Start, FVector Direction, int Boun
 	DrawDebugLine(GetWorld(), Start, End, FColor(255, 0, 0), false, 0.1f, 0, 3.f);
 	return false;
 }
-
-//
-//bool ALightEmitter::SendLaserUp(FVector Start, int Bounces)
-//{
-//	if (Bounces > MaxBounces) return false;
-//	FVector UpVector = Start.GetSafeNormal();
-//
-//	FVector End = Start + 1000.F * UpVector;
-//
-//	
-//	FHitResult Hit;
-//	bool bHitSomething = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECollisionChannel::ECC_Visibility);
-//	if (bHitSomething)
-//	{
-//		DrawDebugLine(GetWorld(), Start, Hit.ImpactPoint, FColor(255, 0, 0), false, 0.1f, 0, 3.f);
-//		float HitPlaneAngle = FVector::DotProduct(Hit.ImpactPoint.GetSafeNormal(), Hit.Normal);
-//
-//		UE_LOG(LogTemp, Warning, TEXT("Send up hit something angle : %f"), HitPlaneAngle);
-//		if (HitPlaneAngle >	-0.707F)
-//		{
-//			return SendLaserCCW(Hit.ImpactPoint, Bounces + 1);
-//		}
-//		else
-//		{
-//			return SendLaserCW(Hit.ImpactPoint, Bounces + 1);
-//		}
-//	}
-//	DrawDebugLine(GetWorld(), Start, End, FColor(255, 0, 0), false, 0.1f, 0, 3.f);
-//	return false;
-//}
-//
-//bool ALightEmitter::SendLaserDown(FVector Start, int Bounces)
-//{
-//	if (Bounces > MaxBounces) return false;
-//
-//	FVector UpVector = Start.GetSafeNormal();
-//	FVector End = Start - 1000.F * UpVector;
-//
-//	FHitResult Hit;
-//	bool bHitSomething = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECollisionChannel::ECC_Visibility);
-//	if (bHitSomething)
-//	{
-//		DrawDebugLine(GetWorld(), Start, Hit.ImpactPoint, FColor(255, 0, 0), false, 0.1f, 0, 3.f);
-//		float HitPlaneAngle = FVector::DotProduct(Hit.ImpactPoint.GetSafeNormal(), Hit.Normal);
-//
-//		UE_LOG(LogTemp, Warning, TEXT("Send Down hit something angle : %f"), HitPlaneAngle);
-//		if (HitPlaneAngle > -0.707F)
-//		{
-//			return SendLaserCCW(Hit.ImpactPoint, Bounces + 1);
-//		}
-//		else
-//		{
-//			return SendLaserCW(Hit.ImpactPoint, Bounces + 1);
-//		}
-//	}
-//
-//	DrawDebugLine(GetWorld(), Start, End, FColor(255, 0, 0), false, 0.1f, 0, 3.f);
-//	return false;
-//}
