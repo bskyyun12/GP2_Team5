@@ -7,6 +7,8 @@
 
 void ATeam5AIController::BeginPlay()
 {
+	Super::BeginPlay();
+
 	if (AIBehavior != nullptr)
 	{
 		RunBehaviorTree(AIBehavior);
