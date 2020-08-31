@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "Collectible.h"
+
 #include "GameFramework/RotatingMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
-
-#include "Collectible.h"
 
 // Sets default values
 ACollectible::ACollectible()
