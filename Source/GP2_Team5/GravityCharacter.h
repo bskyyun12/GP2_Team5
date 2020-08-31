@@ -7,6 +7,7 @@
 #include "ApproachInteract.h"
 #include "GravitySwappable.h"
 #include "ClickInteract.h"
+#include "Collectible.h"
 #include "GravityCharacter.generated.h"
 
 
@@ -41,6 +42,7 @@ public:
 	virtual bool GetFlipGravity() const override;
 	virtual void SetFlipGravity(bool bNewGravity) override;
 
+	virtual void AddCollectible(ACollectible* Collectible);
 
 protected: 
 	virtual void BeginPlay() override;
@@ -61,6 +63,9 @@ protected:
 
 // -- Member variables --
 protected:
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "GravityCharacter|SaveData")
+	TMap<ECollectibleType, int32> Collectibles;
+
 	UGravityMovementComponent* CachedGravityMovementyCmp = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "GravityCharacter|Gravity")
