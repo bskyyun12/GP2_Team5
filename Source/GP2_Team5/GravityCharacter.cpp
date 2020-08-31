@@ -135,6 +135,30 @@ void AGravityCharacter::SetFlipGravity(bool bNewGravity)
 	bFlipGravity = bNewGravity;
 }
 
+void AGravityCharacter::AddCollectible(ACollectible* Collectible)
+{
+	if (Collectible != nullptr)
+	{
+		if (Collectible->GetCount() <= 0 || Collectible->GetType() == ECollectibleType::None)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Collitible has invalid type and/or count"));
+		}
+
+		if (Collectibles.Contains(Collectible->GetType()))
+		{
+			Collectibles[Collectible->GetType()] += Collectible->GetCount();
+		}
+		else
+		{
+			Collectibles.Add(Collectible->GetType() , Collectible->GetCount());
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Collitible was nullptrs"));
+	}
+}
+
 void AGravityCharacter::SetGravityTarget(FVector NewGravityPoint)
 {
 	GravityPoint = NewGravityPoint;
