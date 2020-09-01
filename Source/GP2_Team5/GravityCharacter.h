@@ -10,7 +10,6 @@
 #include "Collectible.h"
 #include "GravityCharacter.generated.h"
 
-
 template<class T>
 UActorComponent* GetComponent(AActor* Actor) 
 {	
@@ -54,12 +53,13 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SetGravityTarget(FVector NewGravityPoint);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Collectible")
+	void OnCollectibleAdded(ECollectibleType Type, int32 NewCount);
+
 	UFUNCTION(BlueprintPure)
 	UGravityMovementComponent* GetGravityMovementComponent() const { return CachedGravityMovementyCmp; }
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-
-
 
 // -- Member variables --
 protected:

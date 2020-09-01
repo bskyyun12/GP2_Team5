@@ -139,9 +139,9 @@ void AGravityCharacter::AddCollectible(ACollectible* Collectible)
 {
 	if (Collectible != nullptr)
 	{
-		if (Collectible->GetCount() <= 0 || Collectible->GetType() == ECollectibleType::None)
+		if (Collectible->GetCount() <= 0)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Collitible has invalid type and/or count"));
+			UE_LOG(LogTemp, Error, TEXT("Collitible has invalid count"));
 		}
 
 		if (Collectibles.Contains(Collectible->GetType()))
@@ -152,6 +152,9 @@ void AGravityCharacter::AddCollectible(ACollectible* Collectible)
 		{
 			Collectibles.Add(Collectible->GetType() , Collectible->GetCount());
 		}
+
+		// Notify blueprint 
+		OnCollectibleAdded(Collectible->GetType(), Collectibles[Collectible->GetType()]);
 	}
 	else
 	{
