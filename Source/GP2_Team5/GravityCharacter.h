@@ -120,6 +120,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
 	bool bIsGrabbing = false;
 
+	// Powers
+	UPROPERTY(EditAnywhere)
+	bool bHasRelic1 = false;
+
+	UPROPERTY(EditAnywhere)
+	bool bHasRelic2 = false;
+
 	/// Check list
 	/// while grabbing -> NO: click interact / approach interact / jump
 	/// while having first click focus -> NO: move, jump, approach interact -> reset first focus
