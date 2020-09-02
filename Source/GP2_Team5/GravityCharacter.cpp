@@ -139,9 +139,9 @@ void AGravityCharacter::AddCollectible(ACollectible* Collectible)
 {
 	if (Collectible != nullptr)
 	{
-		if (Collectible->GetCount() <= 0 || Collectible->GetType() == ECollectibleType::None)
+		if (Collectible->GetCount() <= 0)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Collitible has invalid type and/or count"));
+			UE_LOG(LogTemp, Error, TEXT("Collitible has invalid count"));
 		}
 
 		if (Collectibles.Contains(Collectible->GetType()))
@@ -152,6 +152,9 @@ void AGravityCharacter::AddCollectible(ACollectible* Collectible)
 		{
 			Collectibles.Add(Collectible->GetType() , Collectible->GetCount());
 		}
+
+		// Notify blueprint 
+		OnCollectibleAdded(Collectible->GetType(), Collectibles[Collectible->GetType()]);
 	}
 	else
 	{
@@ -319,10 +322,13 @@ void AGravityCharacter::OnClickInteract()
 					// if both has different gravity direction
 					if (CurrentClickFocusComp->GetFlipGravity() != NewClickFocusComp->GetFlipGravity())
 					{
-						// Flip gravity for both
-						UE_LOG(LogTemp, Warning, TEXT("Swap gravity"));
-						CurrentClickFocusComp->SetFlipGravity(!CurrentClickFocusComp->GetFlipGravity());
-						NewClickFocusComp->SetFlipGravity(!NewClickFocusComp->GetFlipGravity());
+						if (CanSwapGravity(CurrentClickFocus, NewClickFocus))
+						{	
+							// Flip gravity for both
+							UE_LOG(LogTemp, Warning, TEXT("Swap gravity"));
+							CurrentClickFocusComp->SetFlipGravity(!CurrentClickFocusComp->GetFlipGravity());
+							NewClickFocusComp->SetFlipGravity(!NewClickFocusComp->GetFlipGravity());
+						}
 					}
 				}
 
@@ -341,6 +347,36 @@ void AGravityCharacter::ResetClickInteract(UActorComponent*& FocusToReset)
 	IClickInteract::Execute_ResetClickInteract(FocusToReset);
 	FocusToReset = nullptr;
 }
+
+bool AGravityCharacter::CanSwapGravity(UActorComponent* Comp1, UActorComponent* Comp2)
+{
+	// Is the focus player?
+	bool bIsFocusPlayer = false;
+	if (Cast<AGravityCharacter>(Comp1->GetOwner()) != nullptr
+		|| Cast<AGravityCharacter>(Comp2->GetOwner()) != nullptr)
+	{
+		bIsFocusPlayer = true;
+	}
+
+	// One of the focuses is player but does not have Relic1 power.
+	if (bHasRelic1 == false && bIsFocusPlayer == true)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player does not have a Relic1 power"));
+		ResetClickInteract(CurrentClickFocus);
+		return false;
+	}
+
+	// both focuses are object but does not have Relic2 power
+	if (bHasRelic2 == false && bIsFocusPlayer == false)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player does not have a Relic2 power"));
+		ResetClickInteract(CurrentClickFocus);
+		return false;
+	}
+
+	return true;
+}
+
 // End Interact
 //////////////////////////////////////////////////////////////////////////
 #pragma endregion Interaction
