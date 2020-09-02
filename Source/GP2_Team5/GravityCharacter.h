@@ -121,10 +121,10 @@ protected:
 	bool bIsGrabbing = false;
 
 	// Powers
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
 	bool bHasRelic1 = false;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
 	bool bHasRelic2 = false;
 
 	/// Check list
