@@ -10,7 +10,6 @@
 #include "Collectible.h"
 #include "GravityCharacter.generated.h"
 
-
 template<class T>
 UActorComponent* GetComponent(AActor* Actor) 
 {	
@@ -54,12 +53,13 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SetGravityTarget(FVector NewGravityPoint);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Collectible")
+	void OnCollectibleAdded(ECollectibleType Type, int32 NewCount);
+
 	UFUNCTION(BlueprintPure)
 	UGravityMovementComponent* GetGravityMovementComponent() const { return CachedGravityMovementyCmp; }
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-
-
 
 // -- Member variables --
 protected:
@@ -115,10 +115,18 @@ protected:
 	void OnClickInteract();
 	UActorComponent* CurrentClickFocus = nullptr;
 	void ResetClickInteract(UActorComponent*& FocusToReset);
+	bool CanSwapGravity(UActorComponent* Comp1, UActorComponent* Comp2);
 
 	// 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
 	bool bIsGrabbing = false;
+
+	// Powers
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
+	bool bHasRelic1 = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
+	bool bHasRelic2 = false;
 
 	/// Check list
 	/// while grabbing -> NO: click interact / approach interact / jump
