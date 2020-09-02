@@ -7,10 +7,11 @@
 #include "GravitySwappable.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, BlueprintType, meta=(CannotImplementInterfaceInBlueprint))
 class UGravitySwappable : public UInterface
 {
 	GENERATED_BODY()
+
 };
 
 /**
@@ -20,11 +21,12 @@ class GP2_TEAM5_API IGravitySwappable
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
-public:
-	virtual bool CanSwap(IGravitySwappable* other);
-	virtual void SwapGravity(IGravitySwappable* other);
-	virtual bool GetFlipGravity();
-	virtual void SetFlipGravity(bool bNewGravity);
 
+public:
+
+	UFUNCTION(BlueprintCallable)
+	virtual bool GetFlipGravity() const = 0;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SetFlipGravity(bool bNewGravity) = 0;
 };

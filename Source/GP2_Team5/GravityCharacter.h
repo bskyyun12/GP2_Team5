@@ -4,16 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "ApproachInteract.h"
 #include "GravitySwappable.h"
 #include "ClickInteract.h"
+#include "Collectible.h"
 #include "GravityCharacter.generated.h"
 
-// -- forward declarations --
+
+template<class T>
+UActorComponent* GetComponent(AActor* Actor) 
+{	
+	TArray<UActorComponent*> Components = Actor->GetComponentsByInterface(T::StaticClass());
+	for (UActorComponent* Comp : Components)
+	{
+		if (Comp->GetClass()->ImplementsInterface(T::StaticClass()))
+		{
+			return Comp;
+		}
+	}
+	return nullptr;
+}
+
+//--- forward declarations ---
 class UGravityMovementComponent;
 
-
 UCLASS()
-class GP2_TEAM5_API AGravityCharacter : public ACharacter, public IGravitySwappable, public IClickInteract
+class GP2_TEAM5_API AGravityCharacter : public ACharacter, public IGravitySwappable
 {
 	GENERATED_BODY()
 
@@ -23,29 +39,15 @@ public:
 	AGravityCharacter(const FObjectInitializer& ObjectInitializer);
 
 	// IGravitySwappable
-	bool CanSwap(IGravitySwappable* other) override;
-	void SwapGravity(IGravitySwappable* other) override;
-	bool GetFlipGravity() override;
-	void SetFlipGravity(bool bNewGravity) override;
+	virtual bool GetFlipGravity() const override;
+	virtual void SetFlipGravity(bool bNewGravity) override;
 
-	// IClickInteract
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void ClickInteract() override;
-	virtual void ClickInteract_Implementation();
+	virtual void AddCollectible(ACollectible* Collectible);
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void ResetClickInteract() override;
-	virtual void ResetClickInteract_Implementation();
-
-protected:
-	// Called when the game starts or when spawned
+protected: 
 	virtual void BeginPlay() override;
-
-public:
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
+	void MoveRight(float Val);
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// Sets the point the character gravitates towards
@@ -54,16 +56,76 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	UGravityMovementComponent* GetGravityMovementComponent() const { return CachedGravityMovementyCmp; }
+	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
+
+
+// -- Member variables --
 protected:
+	UPROPERTY(SaveGame, BlueprintReadWrite, Category = "GravityCharacter|SaveData")
+	TMap<ECollectibleType, int32> Collectibles;
+
 	UGravityMovementComponent* CachedGravityMovementyCmp = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Gravity")
+	UPROPERTY(EditAnywhere, Category = "GravityCharacter|Gravity")
 	FVector GravityPoint {};
 
 	/* The rate at which gravity changes from old to new target */
-	UPROPERTY(EditAnywhere, Category = "Gravity")
+	UPROPERTY(EditAnywhere, Category = "GravityCharacter|Gravity")
 	float GravityChangeSpeed = 25.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gravity")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Gravity")
 	bool bFlipGravity = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "GravityCharacter|Camera")
+	bool bRotateCameraToPlayer = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	class UCameraComponent* SideViewCameraComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	class USpringArmComponent* CameraBoom;
+
+#pragma region Jump
+
+	void Jump();
+
+	UFUNCTION(BlueprintPure, Category = "GravityCharacter|Jump")
+	bool IsJumping();
+
+#pragma endregion
+
+
+#pragma region Interaction
+
+	UPROPERTY(EditAnywhere, Category = "GravityCharacter|Interaction")
+	class UBoxComponent* InteractBox;
+
+	UPROPERTY(EditAnywhere, Category = "GravityCharacter|Interaction")
+	float ClickInteractRange = 700.f;
+
+	// Approach Interact
+	void OnApproachInteract();
+	void OnApproachInteractReleased();
+	UActorComponent* TryGetApproachInteractableComp();
+	UActorComponent* ApproachInteractableComp = nullptr;
+
+	// Click Interact
+	void OnClickInteract();
+	UActorComponent* CurrentClickFocus = nullptr;
+	void ResetClickInteract(UActorComponent*& FocusToReset);
+
+	// 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
+	bool bIsGrabbing = false;
+
+	/// Check list
+	/// while grabbing -> NO: click interact / approach interact / jump
+	/// while having first click focus -> NO: move, jump, approach interact -> reset first focus
+	/// while jumping -> NO: grab / click interact / approach interact(?)
+	/// 
+	/// </summary>
+
+#pragma endregion
 };

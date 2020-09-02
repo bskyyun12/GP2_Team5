@@ -12,19 +12,22 @@ class GP2_TEAM5_API ALightEmitter : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ALightEmitter();
 
-protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	bool SendLaserCCW(FVector Start, int Bounces);
+	bool SendLaserCW(FVector Start, int Bounces);
+
+	bool SendLaserStraight(FVector Start, FVector Direction, int Bounces);
+
+protected:
 	UPROPERTY(Editanywhere, BlueprintReadWrite)
 	float QuantizationLevel = 0.1F;
 
+	UPROPERTY(Editanywhere)
+	bool bIsCCW = false;
 
+	int32 MaxBounces = 12;
 };
