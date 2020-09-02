@@ -322,35 +322,13 @@ void AGravityCharacter::OnClickInteract()
 					// if both has different gravity direction
 					if (CurrentClickFocusComp->GetFlipGravity() != NewClickFocusComp->GetFlipGravity())
 					{
-						// Is the focus player?
-						bool bIsFocusPlayer = false;
-						if (Cast<AGravityCharacter>(NewClickFocusComp->GetOwner()) != nullptr 
-							|| Cast<AGravityCharacter>(CurrentClickFocusComp->GetOwner()) != nullptr)
-						{
-							bIsFocusPlayer = true;
+						if (CanSwapGravity(CurrentClickFocus, NewClickFocus))
+						{	
+							// Flip gravity for both
+							UE_LOG(LogTemp, Warning, TEXT("Swap gravity"));
+							CurrentClickFocusComp->SetFlipGravity(!CurrentClickFocusComp->GetFlipGravity());
+							NewClickFocusComp->SetFlipGravity(!NewClickFocusComp->GetFlipGravity());
 						}
-
-						// One of the focuses is player but does not have Relic1 power.
-						if (bHasRelic1 == false && bIsFocusPlayer == true)
-						{
-							UE_LOG(LogTemp, Warning, TEXT("Player does not have a Relic1 power"));
-							ResetClickInteract(CurrentClickFocus);
-							return;
-						}
-
-						// both focuses are object but does not have Relic2 power
-						if (bHasRelic2 == false && bIsFocusPlayer == false)
-						{
-
-							UE_LOG(LogTemp, Warning, TEXT("Player does not have a Relic2 power"));
-							ResetClickInteract(CurrentClickFocus);
-							return;
-						}
-
-						// Flip gravity for both
-						UE_LOG(LogTemp, Warning, TEXT("Swap gravity"));
-						CurrentClickFocusComp->SetFlipGravity(!CurrentClickFocusComp->GetFlipGravity());
-						NewClickFocusComp->SetFlipGravity(!NewClickFocusComp->GetFlipGravity());
 					}
 				}
 
@@ -369,6 +347,36 @@ void AGravityCharacter::ResetClickInteract(UActorComponent*& FocusToReset)
 	IClickInteract::Execute_ResetClickInteract(FocusToReset);
 	FocusToReset = nullptr;
 }
+
+bool AGravityCharacter::CanSwapGravity(UActorComponent* Comp1, UActorComponent* Comp2)
+{
+	// Is the focus player?
+	bool bIsFocusPlayer = false;
+	if (Cast<AGravityCharacter>(Comp1->GetOwner()) != nullptr
+		|| Cast<AGravityCharacter>(Comp2->GetOwner()) != nullptr)
+	{
+		bIsFocusPlayer = true;
+	}
+
+	// One of the focuses is player but does not have Relic1 power.
+	if (bHasRelic1 == false && bIsFocusPlayer == true)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player does not have a Relic1 power"));
+		ResetClickInteract(CurrentClickFocus);
+		return false;
+	}
+
+	// both focuses are object but does not have Relic2 power
+	if (bHasRelic2 == false && bIsFocusPlayer == false)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player does not have a Relic2 power"));
+		ResetClickInteract(CurrentClickFocus);
+		return false;
+	}
+
+	return true;
+}
+
 // End Interact
 //////////////////////////////////////////////////////////////////////////
 #pragma endregion Interaction

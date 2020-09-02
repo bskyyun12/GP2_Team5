@@ -115,6 +115,7 @@ protected:
 	void OnClickInteract();
 	UActorComponent* CurrentClickFocus = nullptr;
 	void ResetClickInteract(UActorComponent*& FocusToReset);
+	bool CanSwapGravity(UActorComponent* Comp1, UActorComponent* Comp2);
 
 	// 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
