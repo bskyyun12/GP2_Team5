@@ -11,7 +11,8 @@ UENUM(BlueprintType)
 enum class ECollectibleType : uint8
 {
 	Coin,
-	Relic,
+	Relic1,
+	Relic2,
 };
 
 
