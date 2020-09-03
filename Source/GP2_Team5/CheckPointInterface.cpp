@@ -10,7 +10,7 @@ void ICheckPointInterface::OnRest_Implementation()
 }
 
 
-void ICheckPointInterface::OnEnterCheckPoint_Implementation(AActor* Caller)
+void ICheckPointInterface::OnEnterCheckPoint_Implementation(AActor* Caller, AActor* CheckPointRef)
 {
 
 }
