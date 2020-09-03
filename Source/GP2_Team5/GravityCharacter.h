@@ -7,12 +7,13 @@
 #include "ApproachInteract.h"
 #include "GravitySwappable.h"
 #include "ClickInteract.h"
+#include "ClickInteractComponent.h"
 #include "Collectible.h"
+#include "Enums.h"
 #include "GravityCharacter.generated.h"
 
-
 template<class T>
-UActorComponent* GetComponent(AActor* Actor) 
+UActorComponent* GetComponentByInterface(AActor* Actor) 
 {	
 	TArray<UActorComponent*> Components = Actor->GetComponentsByInterface(T::StaticClass());
 	for (UActorComponent* Comp : Components)
@@ -23,6 +24,27 @@ UActorComponent* GetComponent(AActor* Actor)
 		}
 	}
 	return nullptr;
+}
+
+template<class T>
+TArray<T*> SphereOverlapComponents(UObject* World, FVector SphereCenter, float SphereRadius)
+{
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_MAX));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+	TArray<AActor*> ActorsToIgnore;
+	TArray<AActor*> OutActors;
+	TArray<T*> OverlapingComponents;
+	UKismetSystemLibrary::SphereOverlapActors(World, SphereCenter, SphereRadius, ObjectTypes, AActor::StaticClass(), ActorsToIgnore, OutActors);
+	for (AActor* OverlapingActor : OutActors)
+	{
+		UActorComponent* Comp = OverlapingActor->GetComponentByClass(T::StaticClass());
+		if (Comp != nullptr)
+		{
+			OverlapingComponents.Add(Cast<T>(Comp));
+		}
+	}
+	return OverlapingComponents;
 }
 
 //--- forward declarations ---
@@ -54,12 +76,13 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SetGravityTarget(FVector NewGravityPoint);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Collectible")
+	void OnCollectibleAdded(ECollectibleType Type, int32 NewCount);
+
 	UFUNCTION(BlueprintPure)
 	UGravityMovementComponent* GetGravityMovementComponent() const { return CachedGravityMovementyCmp; }
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-
-
 
 // -- Member variables --
 protected:
@@ -98,6 +121,7 @@ protected:
 
 
 #pragma region Interaction
+protected:
 
 	UPROPERTY(EditAnywhere, Category = "GravityCharacter|Interaction")
 	class UBoxComponent* InteractBox;
@@ -113,19 +137,41 @@ protected:
 
 	// Click Interact
 	void OnClickInteract();
-	UActorComponent* CurrentClickFocus = nullptr;
-	void ResetClickInteract(UActorComponent*& FocusToReset);
+	UClickInteractComponent* CurrentClickFocus = nullptr;
+	void ResetClickInteract(UClickInteractComponent*& FocusToReset);
 
 	// 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
 	bool bIsGrabbing = false;
 
+	// Powers
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
+	bool bHasRelic1 = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
+	bool bHasRelic2 = false;
+
+public:
+	bool CanSwapGravity(UActorComponent* Comp1, UActorComponent* Comp2);
+	float GetClickInteractRange() { return ClickInteractRange; }
+	UClickInteractComponent* GetCurrentClickFocus() { return CurrentClickFocus; }
+	FocusType GetClickFocusType(UClickInteractComponent* ClickFocus);
+
+	UFUNCTION(BlueprintPure)
+	bool HasCurrentClickFocus() { return CurrentClickFocus != nullptr; }
+
+	UFUNCTION(BlueprintPure)
+	bool HasRelic1() { return bHasRelic1; }
+
+	UFUNCTION(BlueprintPure)
+	bool HasRelic2() { return bHasRelic2; }
 	/// Check list
 	/// while grabbing -> NO: click interact / approach interact / jump
 	/// while having first click focus -> NO: move, jump, approach interact -> reset first focus
 	/// while jumping -> NO: grab / click interact / approach interact(?)
 	/// 
 	/// </summary>
+
 
 #pragma endregion
 };

@@ -29,6 +29,6 @@ void AGravityPlayerController::GameOver(bool bHasWon)
 		}
 	}
 
-	GetWorldTimerManager().SetTimer(RestartTimer, this, &APlayerController::RestartLevel, RestartDelay);
+	//GetWorldTimerManager().SetTimer(RestartTimer, this, &APlayerController::RestartLevel, RestartDelay);
 }
 
