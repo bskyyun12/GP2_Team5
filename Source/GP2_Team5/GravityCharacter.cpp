@@ -8,9 +8,11 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GravitySwappable.h"
 #include "ClickInteract.h"	
+#include "ClickInteractComponent.h"
 #include "DrawDebugHelpers.h"
 #include "GravitySwapComponent.h"
 
@@ -150,7 +152,7 @@ void AGravityCharacter::AddCollectible(ACollectible* Collectible)
 		}
 		else
 		{
-			Collectibles.Add(Collectible->GetType() , Collectible->GetCount());
+			Collectibles.Add(Collectible->GetType(), Collectible->GetCount());
 		}
 
 		// Notify blueprint 
@@ -243,7 +245,7 @@ UActorComponent* AGravityCharacter::TryGetApproachInteractableComp()
 		}
 	}
 
-	return GetComponent<UApproachInteract>(ClosestActor);
+	return GetComponentByInterface<UApproachInteract>(ClosestActor);
 }
 
 // Click Interact
@@ -289,7 +291,13 @@ void AGravityCharacter::OnClickInteract()
 		}
 
 		// Try getting a component with a UClickInteract interface
-		UActorComponent* NewClickFocus = GetComponent<UClickInteract>(HitActor);
+		UActorComponent* ClickComp = GetComponentByInterface<UClickInteract>(HitActor);
+		if (ClickComp == nullptr)	// This will never happen but still :)
+		{
+			ResetClickInteract(CurrentClickFocus);
+			return;
+		}
+		UClickInteractComponent* NewClickFocus = Cast<UClickInteractComponent>(ClickComp);
 		if (NewClickFocus == nullptr) 	// Clicked a Non-ClickInteractable
 		{
 			ResetClickInteract(CurrentClickFocus);
@@ -299,9 +307,46 @@ void AGravityCharacter::OnClickInteract()
 		{
 			if (CurrentClickFocus == nullptr)	// CurrentClickFocus is null
 			{
+				UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is null. New CurrentClickFocus: %s"), *NewClickFocus->GetName());
 				CurrentClickFocus = NewClickFocus;
+				CurrentClickFocus->bSelected = true;
 				IClickInteract::Execute_ClickInteract(CurrentClickFocus);
-				UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is null. New CurrentClickFocus: %s"), *CurrentClickFocus->GetName());
+
+				// Outline objects within range
+				TArray<UClickInteractComponent*> OverlapingComponents = SphereOverlapComponents<UClickInteractComponent>(GetWorld(), GetActorLocation(), ClickInteractRange);
+				for (UClickInteractComponent* OverlapComp : OverlapingComponents)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("OverlapingActor: %s"), *OverlapComp->GetOwner()->GetName());
+					if (GetDistanceTo(OverlapComp->GetOwner()) < ClickInteractRange)
+					{
+						// one is player and the other is object. but no Relic1
+						if (GetClickFocusType(CurrentClickFocus) == FocusType::Player && GetClickFocusType(OverlapComp) == FocusType::Object
+							|| GetClickFocusType(CurrentClickFocus) == FocusType::Object && GetClickFocusType(OverlapComp) == FocusType::Player)
+						{
+							if (bHasRelic1 == false)
+							{
+								continue;
+							}
+						}
+
+						// Both are objects. but no Relic2
+						if (GetClickFocusType(CurrentClickFocus) == FocusType::Object && GetClickFocusType(OverlapComp) == FocusType::Object)
+						{
+							if (bHasRelic2 == false)
+							{
+								continue;
+							}
+						}
+
+						// Both can't be swapped
+						if (CanSwapGravity(CurrentClickFocus, OverlapComp) == false)
+						{
+							continue;
+						}
+
+						OverlapComp->ActivateHighlight(nullptr);
+					}
+				}
 			}
 			else if (CurrentClickFocus == NewClickFocus)	// Clicked the same object
 			{
@@ -313,22 +358,18 @@ void AGravityCharacter::OnClickInteract()
 				UE_LOG(LogTemp, Warning, TEXT("Clicked two different objects. Reset CurrentClickFocus and NewClickFocus"));
 
 				// Try casting to UGravitySwapComponent
-				UGravitySwapComponent* CurrentClickFocusComp = Cast<UGravitySwapComponent>(GetComponent<UGravitySwappable>(CurrentClickFocus->GetOwner()));
-				UGravitySwapComponent* NewClickFocusComp = Cast<UGravitySwapComponent>(GetComponent<UGravitySwappable>(NewClickFocus->GetOwner()));
+				UGravitySwapComponent* CurrentClickFocusComp = Cast<UGravitySwapComponent>(GetComponentByInterface<UGravitySwappable>(CurrentClickFocus->GetOwner()));
+				UGravitySwapComponent* NewClickFocusComp = Cast<UGravitySwapComponent>(GetComponentByInterface<UGravitySwappable>(NewClickFocus->GetOwner()));
 
 				// if both has UGravitySwapComponent
 				if (CurrentClickFocusComp != nullptr && NewClickFocusComp != nullptr)
 				{
-					// if both has different gravity direction
-					if (CurrentClickFocusComp->GetFlipGravity() != NewClickFocusComp->GetFlipGravity())
+					if (CanSwapGravity(CurrentClickFocus, NewClickFocus))
 					{
-						if (CanSwapGravity(CurrentClickFocus, NewClickFocus))
-						{	
-							// Flip gravity for both
-							UE_LOG(LogTemp, Warning, TEXT("Swap gravity"));
-							CurrentClickFocusComp->SetFlipGravity(!CurrentClickFocusComp->GetFlipGravity());
-							NewClickFocusComp->SetFlipGravity(!NewClickFocusComp->GetFlipGravity());
-						}
+						// Flip gravity for both
+						UE_LOG(LogTemp, Warning, TEXT("Swap gravity"));
+						CurrentClickFocusComp->SetFlipGravity(!CurrentClickFocusComp->GetFlipGravity());
+						NewClickFocusComp->SetFlipGravity(!NewClickFocusComp->GetFlipGravity());
 					}
 				}
 
@@ -339,18 +380,34 @@ void AGravityCharacter::OnClickInteract()
 	}
 }
 
-void AGravityCharacter::ResetClickInteract(UActorComponent*& FocusToReset)
+void AGravityCharacter::ResetClickInteract(UClickInteractComponent*& FocusToReset)
 {
 	if (FocusToReset == nullptr) { return; }
 	if (FocusToReset->Implements<UClickInteract>() == false) { return; }
 
 	IClickInteract::Execute_ResetClickInteract(FocusToReset);
+	FocusToReset->bSelected = false;
 	FocusToReset = nullptr;
+
+	// Remove Outline objects within range
+	TArray<UClickInteractComponent*> OverlapingComponents = SphereOverlapComponents<UClickInteractComponent>(GetWorld(), GetActorLocation(), ClickInteractRange);
+	for (UClickInteractComponent* Comp : OverlapingComponents)
+	{
+		if (GetDistanceTo(Comp->GetOwner()) < ClickInteractRange)
+		{
+			Comp->DeactivateHighlight(nullptr);
+		}
+	}
 }
 
 bool AGravityCharacter::CanSwapGravity(UActorComponent* Comp1, UActorComponent* Comp2)
 {
-	// Is the focus player?
+	if (Comp1 == nullptr || Comp2 == nullptr)
+	{
+		return false;
+	}
+
+	// Is one of the focuses the player?
 	bool bIsFocusPlayer = false;
 	if (Cast<AGravityCharacter>(Comp1->GetOwner()) != nullptr
 		|| Cast<AGravityCharacter>(Comp2->GetOwner()) != nullptr)
@@ -374,7 +431,41 @@ bool AGravityCharacter::CanSwapGravity(UActorComponent* Comp1, UActorComponent* 
 		return false;
 	}
 
+	// Try casting to UGravitySwapComponent
+	UGravitySwapComponent* GravityComp1 = Cast<UGravitySwapComponent>(GetComponentByInterface<UGravitySwappable>(Comp1->GetOwner()));
+	UGravitySwapComponent* GravityComp2 = Cast<UGravitySwapComponent>(GetComponentByInterface<UGravitySwappable>(Comp2->GetOwner()));
+
+	// if one of them doesn't have UGravitySwapComponent
+	if (GravityComp1 == nullptr || GravityComp2 == nullptr)
+	{
+		return false;
+	}
+
+	// if both has same gravity direction
+	if (GravityComp1->GetFlipGravity() == GravityComp2->GetFlipGravity())
+	{
+		return false;
+	}
+
 	return true;
+}
+
+FocusType AGravityCharacter::GetClickFocusType(UClickInteractComponent* ClickFocus)
+{
+	if (ClickFocus == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is null"));
+		return FocusType::Null;
+	}
+
+	if (ClickFocus->GetOwner() == this)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is Player"));
+		return FocusType::Player;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is Object"));
+	return FocusType::Object;
 }
 
 // End Interact
