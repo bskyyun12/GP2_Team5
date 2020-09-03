@@ -46,7 +46,7 @@ protected:
 	bool bCanEverTick = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Mesh")
-	class UPrimitiveComponent* PhysicsComp = nullptr;
+	UStaticMeshComponent* Mesh = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gravity");
 	float GravityAcceleration = 1400.F;

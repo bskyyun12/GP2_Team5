@@ -28,27 +28,12 @@ public:
 		
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInteractDelegate);
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHighlightDelegate, bool, bIsWithinRange, bool, bClickable);
 
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnInteractDelegate OnClickInteract;
 
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnInteractDelegate OnResetClickInteract;
-
-	UPROPERTY(BlueprintAssignable, Category = "Interaction")
-	FHighlightDelegate OnActivateHighlight;
-
-	UPROPERTY(BlueprintAssignable, Category = "Interaction")
-	FHighlightDelegate OnDeactivateHighlight;
-
-	bool bClickable = true;
-	bool bSelected = false;
-
-	UFUNCTION()
-	void ActivateHighlight(UPrimitiveComponent* TouchedComponent);
-	UFUNCTION()
-	void DeactivateHighlight(UPrimitiveComponent* TouchedComponent);
 
 	void ClickInteract();
 	virtual void ClickInteract_Implementation();

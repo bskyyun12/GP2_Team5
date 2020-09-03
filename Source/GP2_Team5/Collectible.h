@@ -10,9 +10,10 @@
 UENUM(BlueprintType)
 enum class ECollectibleType : uint8
 {
+	None = 0,
+	Relic,
 	Coin,
-	Relic1,
-	Relic2,
+	MoreCoolCollectibleTypesAddedLater
 };
 
 
@@ -25,23 +26,15 @@ class GP2_TEAM5_API ACollectible : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ACollectible();
-	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime);
 
 	ECollectibleType GetType() const { return Type; }
 	int32 GetCount() const { return Count; }
 
-	UFUNCTION(BlueprintImplementableEvent, Category ="Collectible")
-	void OnPickedUp(class AGravityCharacter* PickedBy);
-
-	UFUNCTION()
-	void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Collectible")
-	ECollectibleType Type = ECollectibleType::Coin;
+	ECollectibleType Type = ECollectibleType::None;
 
 	// Amount of items added when collected
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Collectible")
