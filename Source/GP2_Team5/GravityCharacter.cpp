@@ -116,6 +116,14 @@ void AGravityCharacter::MoveRight(float Val)
 
 	// Reset CurrentClickFocus
 	ResetClickInteract(CurrentClickFocus);
+
+	// Update highlight color
+	FHitResult Hit;
+	UClickInteractComponent* ClickComp = TryGetClickCompUnderCursor(Hit);
+	if (ClickComp != nullptr)
+	{
+		ClickComp->ActivateHighlight(nullptr);
+	}
 }
 
 void AGravityCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -267,6 +275,35 @@ UApproachInteractComponent* AGravityCharacter::TryGetApproachInteractableComp()
 	return Cast<UApproachInteractComponent>(GetComponentByInterface<UApproachInteract>(ClosestActor));
 }
 
+bool AGravityCharacter::GetHitResultUnderCursorForObjects(FHitResult& Hit)
+{
+	// Define what to detect by left mouse click event
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_PhysicsBody));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel1));	// Interaction
+	ObjectTypes.Add(ObjectTypeQuery10);	// Pushbable are always interactables
+
+	return GetWorld()->GetFirstPlayerController()->GetHitResultUnderCursorForObjects(ObjectTypes, true, Hit);
+}
+
+UClickInteractComponent* AGravityCharacter::TryGetClickCompUnderCursor(FHitResult& Hit)
+{
+	if (GetHitResultUnderCursorForObjects(Hit))
+	{
+		UActorComponent* ClickComp = GetComponentByInterface<UClickInteract>(Hit.GetActor());
+		if (ClickComp == nullptr)	// This will never happen but still :)
+		{
+			ResetClickInteract(CurrentClickFocus);
+			return nullptr;
+		}
+
+		return Cast<UClickInteractComponent>(ClickComp);
+	}
+
+	return nullptr;
+}
+
 // Click Interact
 void AGravityCharacter::OnClickInteract()
 {
@@ -277,15 +314,8 @@ void AGravityCharacter::OnClickInteract()
 		return;
 	}
 
-	// Define what to detect by left mouse click event
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_PhysicsBody));
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel1));	// Interaction
-	ObjectTypes.Add(ObjectTypeQuery10);	// Pushbable are always interactables
-
 	FHitResult Hit;
-	GetWorld()->GetFirstPlayerController()->GetHitResultUnderCursorForObjects(ObjectTypes, true, Hit);
+	GetHitResultUnderCursorForObjects(Hit);
 
 	if (Hit.bBlockingHit == false)	// Hit Nothing
 	{
@@ -339,11 +369,11 @@ void AGravityCharacter::OnClickInteract()
 
 				IClickInteract::Execute_ClickInteract(CurrentClickFocus);
 
-				// Outline objects within range
+				// Activate "SwappableHighlight" for objects within range
 				TArray<UClickInteractComponent*> OverlapingComponents = SphereOverlapComponents<UClickInteractComponent>(GetWorld(), GetActorLocation(), ClickInteractRange);
 				for (UClickInteractComponent* OverlapComp : OverlapingComponents)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("OverlapingActor: %s"), *OverlapComp->GetOwner()->GetName());
+					UE_LOG(LogTemp, Warning, TEXT("Actors within range: %s"), *OverlapComp->GetOwner()->GetName());
 					if (GetDistanceTo(OverlapComp->GetOwner()) < ClickInteractRange)
 					{
 						// one is player and the other is object. but no Relic1
@@ -371,13 +401,7 @@ void AGravityCharacter::OnClickInteract()
 							continue;
 						}
 
-						//// OverlapComp is not in player's line of sight
-						//if (IsComponentInLineOfSight(OverlapComp) == false)
-						//{
-						//	continue;
-						//}
-
-						OverlapComp->ActivateHighlight(nullptr);
+						OverlapComp->SwappableHighlight();
 					}
 				}
 			}
@@ -418,17 +442,17 @@ void AGravityCharacter::ResetClickInteract(UClickInteractComponent*& FocusToRese
 	if (FocusToReset == nullptr) { return; }
 	if (FocusToReset->Implements<UClickInteract>() == false) { return; }
 
-	IClickInteract::Execute_ResetClickInteract(FocusToReset);
-	FocusToReset->bSelected = false;
+	FocusToReset->OnReset();
 	FocusToReset = nullptr;
 
-	// Remove Outline objects within range
+	// Reset all clickable objects within range
 	TArray<UClickInteractComponent*> OverlapingComponents = SphereOverlapComponents<UClickInteractComponent>(GetWorld(), GetActorLocation(), ClickInteractRange);
 	for (UClickInteractComponent* Comp : OverlapingComponents)
 	{
 		if (GetDistanceTo(Comp->GetOwner()) < ClickInteractRange)
 		{
-			Comp->DeactivateHighlight(nullptr);
+			UE_LOG(LogTemp, Warning, TEXT("ClickComp Reset: %s"), *Comp->GetOwner()->GetName());
+			Comp->OnReset();
 		}
 	}
 }
@@ -451,7 +475,7 @@ bool AGravityCharacter::CanSwapGravity(UActorComponent* Comp1, UActorComponent* 
 	// One of the focuses is player but does not have Relic1 power.
 	if (bHasRelic1 == false && bIsFocusPlayer == true)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Player does not have a Relic1 power"));
+		UE_LOG(LogTemp, Warning, TEXT("Can't swap gravity! : Player does not have a Relic1 power"));
 		ResetClickInteract(CurrentClickFocus);
 		return false;
 	}
@@ -459,7 +483,7 @@ bool AGravityCharacter::CanSwapGravity(UActorComponent* Comp1, UActorComponent* 
 	// both focuses are object but does not have Relic2 power
 	if (bHasRelic2 == false && bIsFocusPlayer == false)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Player does not have a Relic2 power"));
+		UE_LOG(LogTemp, Warning, TEXT("Can't swap gravity! : Player does not have a Relic2 power"));
 		ResetClickInteract(CurrentClickFocus);
 		return false;
 	}
@@ -471,18 +495,21 @@ bool AGravityCharacter::CanSwapGravity(UActorComponent* Comp1, UActorComponent* 
 	// if one of them doesn't have UGravitySwapComponent
 	if (GravityComp1 == nullptr || GravityComp2 == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't swap gravity! : One or both object don't have UGravitySwapComponent"));
 		return false;
 	}
 
 	// if both has same gravity direction
 	if (GravityComp1->GetFlipGravity() == GravityComp2->GetFlipGravity())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't swap gravity! : Both has same gravity direction"));
 		return false;
 	}
 
 	// if one of them is not in player's line of sight
 	if (!IsComponentInLineOfSight(Comp1) || !IsComponentInLineOfSight(Comp2))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't swap gravity! : One of them is not in player's line of sight"));
 		return false;
 	}
 

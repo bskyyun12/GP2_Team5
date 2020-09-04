@@ -25,23 +25,24 @@ void UClickInteractComponent::BeginPlay()
 
 	// ...
 
-	UMeshComponent* Mesh = nullptr;
-	TArray<UMeshComponent*> Components;
-	GetOwner()->GetComponents<UMeshComponent>(Components);
-	for (int32 i = 0; i < Components.Num(); i++)
-	{
-		Mesh = Components[i];
-		break;
-	}
-
+	UMeshComponent* Mesh = GetMeshComponent<USkeletalMeshComponent>(GetOwner());
 	if (Mesh == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Couldn't get owner's mesh: %s"), *GetName());
-		return;
+		UE_LOG(LogTemp, Warning, TEXT("Couldn't Find SkeletalMeshComp. Trying to get StaticMeshComp..."));
+		Mesh = GetMeshComponent<UStaticMeshComponent>(GetOwner());
+		if (Mesh == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Couldn't Find StaticMeshComp either..."));
+			return;
+		}
 	}
 
-	Mesh->OnBeginCursorOver.AddUniqueDynamic(this, &UClickInteractComponent::ActivateHighlight);
-	Mesh->OnEndCursorOver.AddUniqueDynamic(this, &UClickInteractComponent::DeactivateHighlight);
+	if (Mesh != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found Mesh! Owner: %s, Mesh: %s"), *GetOwner()->GetName(), *Mesh->GetName());
+		Mesh->OnBeginCursorOver.AddUniqueDynamic(this, &UClickInteractComponent::ActivateHighlight);
+		Mesh->OnEndCursorOver.AddUniqueDynamic(this, &UClickInteractComponent::DeactivateHighlight);
+	}
 	// ...
 }
 
@@ -53,18 +54,9 @@ void UClickInteractComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	// ...
 }
 
-void UClickInteractComponent::ActivateHighlight(UPrimitiveComponent* TouchedComponent)
+bool UClickInteractComponent::Clickable()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnBeginCursorOver: %s"), *GetOwner()->GetName());
-
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	AGravityCharacter* Player = Cast<AGravityCharacter>(PlayerPawn);
-	if (Player == nullptr || (!Player->HasRelic1() && !Player->HasRelic2()) || bSelected)
-	{
-		return;
-	}
-
-	bClickable = true;
+	AGravityCharacter* Player = GetGravityCharacter();
 
 	// has no ability to swap gravity between player + obj 
 	if (!Player->HasRelic1())
@@ -72,7 +64,8 @@ void UClickInteractComponent::ActivateHighlight(UPrimitiveComponent* TouchedComp
 		if (Player->GetClickFocusType(Player->GetCurrentClickFocus()) == EFocusType::Player && Player->GetClickFocusType(this) == EFocusType::Object
 			|| Player->GetClickFocusType(Player->GetCurrentClickFocus()) == EFocusType::Object && Player->GetClickFocusType(this) == EFocusType::Player)
 		{
-			bClickable = false;
+			UE_LOG(LogTemp, Warning, TEXT("Player doesn't have Relic1"));
+			return false;
 		}
 	}
 
@@ -81,7 +74,8 @@ void UClickInteractComponent::ActivateHighlight(UPrimitiveComponent* TouchedComp
 	{
 		if (Player->GetClickFocusType(Player->GetCurrentClickFocus()) == EFocusType::Object && Player->GetClickFocusType(this) == EFocusType::Object)
 		{
-			bClickable = false;
+			UE_LOG(LogTemp, Warning, TEXT("Player doesn't have Relic2"));
+			return false;
 		}
 	}
 
@@ -90,38 +84,77 @@ void UClickInteractComponent::ActivateHighlight(UPrimitiveComponent* TouchedComp
 	{
 		if (Player->CanSwapGravity(this, Player->GetCurrentClickFocus()) == false)
 		{
-			bClickable = false;
+			return false;
 		}
 	}
 
 	// this component is not in player's line of sight
 	if (Player->IsComponentInLineOfSight(this) == false)
 	{
-		bClickable = false;
+		UE_LOG(LogTemp, Warning, TEXT("This actor ( %s ) is not in player's line of sight"), *GetOwner()->GetName());
+		return false;
+	}
+
+	// This component is not within player's interact range
+	if (Player->GetDistanceTo(GetOwner()) > Player->GetClickInteractRange())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("This actor ( %s ) is not within Player's interaction range"), *GetOwner()->GetName());
+		return false;
+	}
+
+	return true;
+}
+
+AGravityCharacter* UClickInteractComponent::GetGravityCharacter()
+{
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	return Cast<AGravityCharacter>(PlayerPawn);
+}
+
+void UClickInteractComponent::OnReset()
+{
+	bSelected = false;
+	bIsSwappableColorOn = false;
+	IClickInteract::Execute_ResetClickInteract(this);
+	DeactivateHighlight(nullptr);
+}
+
+void UClickInteractComponent::ActivateHighlight(UPrimitiveComponent* TouchedComponent)
+{
+	AGravityCharacter* Player = GetGravityCharacter();
+	if (Player == nullptr || (!Player->HasRelic1() && !Player->HasRelic2()) || bSelected || bIsSwappableColorOn)
+	{
+		return;
 	}
 
 	bool bIsWithinRange = Player->GetDistanceTo(GetOwner()) < Player->GetClickInteractRange();
-	OnActivateHighlight.Broadcast(bIsWithinRange, bClickable);
+	OnActivateHighlight.Broadcast(bIsWithinRange, Clickable() ? HoverColor : NonClickableColor);
 }
 
-void UClickInteractComponent::DeactivateHighlight(UPrimitiveComponent* TouchedComponent)
+void UClickInteractComponent::SwappableHighlight()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnEndCursorOver: %s"), *GetOwner()->GetName());
-	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	AGravityCharacter* Player = Cast<AGravityCharacter>(PlayerPawn);
+	AGravityCharacter* Player = GetGravityCharacter();
 	if (Player == nullptr || (!Player->HasRelic1() && !Player->HasRelic2()) || bSelected)
 	{
 		return;
 	}
 
-	// this component is not in player's line of sight
-	if (Player->IsComponentInLineOfSight(this) == false)
+	bIsSwappableColorOn = true;
+
+	bool bIsWithinRange = Player->GetDistanceTo(GetOwner()) < Player->GetClickInteractRange();
+	OnActivateHighlight.Broadcast(bIsWithinRange, SwappableColor);
+}
+
+void UClickInteractComponent::DeactivateHighlight(UPrimitiveComponent* TouchedComponent)
+{
+	AGravityCharacter* Player = GetGravityCharacter();
+	if (Player == nullptr || (!Player->HasRelic1() && !Player->HasRelic2()) || bSelected || bIsSwappableColorOn)
 	{
-		bClickable = false;
+		return;
 	}
 
 	bool bIsWithinRange = Player->GetDistanceTo(GetOwner()) < Player->GetClickInteractRange();
-	OnDeactivateHighlight.Broadcast(bIsWithinRange, bClickable);
+	OnDeactivateHighlight.Broadcast(bIsWithinRange, Clickable());
 }
 
 void UClickInteractComponent::ClickInteract_Implementation()

@@ -142,6 +142,8 @@ protected:
 	UApproachInteractComponent* ApproachInteractableComp = nullptr;
 
 	// Click Interact
+	bool GetHitResultUnderCursorForObjects(FHitResult& Hit);
+	UClickInteractComponent* TryGetClickCompUnderCursor(FHitResult& Hit);
 	void OnClickInteract();
 	UClickInteractComponent* CurrentClickFocus = nullptr;
 	void ResetClickInteract(UClickInteractComponent*& FocusToReset);
