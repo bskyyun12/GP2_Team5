@@ -13,6 +13,7 @@ UGravitySwapComponent::UGravitySwapComponent()
 // Called when the game starts
 void UGravitySwapComponent::BeginPlay()
 {
+	SetComponentTickEnabled(bCanEverTick);
 	Super::BeginPlay();
 
 	TArray<UStaticMeshComponent*> Components;
@@ -39,7 +40,8 @@ void UGravitySwapComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (PhysicsComp->IsSimulatingPhysics())
+	
+	if (PhysicsComp && PhysicsComp->IsSimulatingPhysics())
 	{
 		auto ClampedDeltaTime = FMath::Min(DeltaTime, 0.05f);
 		auto GravityDirection = UKismetMathLibrary::GetDirectionUnitVector(GetOwner()->GetActorLocation(), GravityPoint);
