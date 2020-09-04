@@ -491,19 +491,8 @@ bool AGravityCharacter::CanSwapGravity(UActorComponent* Comp1, UActorComponent* 
 
 EFocusType AGravityCharacter::GetClickFocusType(UClickInteractComponent* ClickFocus)
 {
-	if (ClickFocus == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is null"));
-		return EFocusType::Null;
-	}
-
-	if (ClickFocus->GetOwner() == this)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is Player"));
-		return EFocusType::Player;
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is Object"));
+	if (ClickFocus == nullptr) { return EFocusType::Null; }
+	if (ClickFocus->GetOwner() == this) { return EFocusType::Player; }
 	return EFocusType::Object;
 }
 
