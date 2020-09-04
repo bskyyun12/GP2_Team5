@@ -156,6 +156,7 @@ public:
 	float GetClickInteractRange() { return ClickInteractRange; }
 	UClickInteractComponent* GetCurrentClickFocus() { return CurrentClickFocus; }
 	EFocusType GetClickFocusType(UClickInteractComponent* ClickFocus);
+	bool IsComponentInLineOfSight(UActorComponent* Comp);
 
 	UFUNCTION(BlueprintPure)
 	bool HasCurrentClickFocus() { return CurrentClickFocus != nullptr; }
