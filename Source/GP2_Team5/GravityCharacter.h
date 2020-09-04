@@ -10,6 +10,7 @@
 #include "ClickInteractComponent.h"
 #include "Collectible.h"
 #include "Enums.h"
+#include "ApproachInteractComponent.h"
 #include "GravityCharacter.generated.h"
 
 template<class T>
@@ -126,14 +127,19 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "GravityCharacter|Interaction")
 	class UBoxComponent* InteractBox;
 
+	UFUNCTION()
+	void OnInteractBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnInteractBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 	UPROPERTY(EditAnywhere, Category = "GravityCharacter|Interaction")
 	float ClickInteractRange = 700.f;
 
 	// Approach Interact
 	void OnApproachInteract();
 	void OnApproachInteractReleased();
-	UActorComponent* TryGetApproachInteractableComp();
-	UActorComponent* ApproachInteractableComp = nullptr;
+	UApproachInteractComponent* TryGetApproachInteractableComp();
+	UApproachInteractComponent* ApproachInteractableComp = nullptr;
 
 	// Click Interact
 	void OnClickInteract();

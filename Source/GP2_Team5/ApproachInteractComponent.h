@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "ApproachInteract.h"
+#include "Components/WidgetComponent.h"
 #include "ApproachInteractComponent.generated.h"
 
 
@@ -26,13 +27,19 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 public:
+	void ShowInteractionWidget() override;
+	void HideInteractionWidget() override;
+
+private:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInteractDelegate);
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnInteractDelegate OnInteract;
 
-
 	UPROPERTY(BlueprintAssignable, Category = "Interaction")
 	FOnInteractDelegate OnInteractReleased;
+
+	UPROPERTY(EditAnywhere, Category = "Interaction")
+	bool bShowInteractWidget = false;
 
 	void Interact();
 	virtual void Interact_Implementation();
@@ -40,7 +47,8 @@ public:
 	void InteractReleased();
 	virtual void InteractReleased_Implementation();
 
-	void ShowInteractionWidget() override;
-	void HideInteractionWidget() override;
-		
+	UWidgetComponent* TryGetWidgetCompFromOwner();
+
+	UPROPERTY(EditAnywhere)
+	UWidgetComponent* WidgetComp = nullptr;
 };

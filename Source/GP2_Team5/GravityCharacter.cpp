@@ -58,9 +58,11 @@ AGravityCharacter::AGravityCharacter(const FObjectInitializer& ObjectInitializer
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 
-	// Interaction
+	// Approach Interaction Box Setup
 	InteractBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Interaction box"));
 	InteractBox->SetupAttachment(RootComponent);
+	InteractBox->OnComponentBeginOverlap.AddDynamic(this, &AGravityCharacter::OnInteractBoxBeginOverlap);
+	InteractBox->OnComponentEndOverlap.AddDynamic(this, &AGravityCharacter::OnInteractBoxEndOverlap);
 }
 
 void AGravityCharacter::BeginPlay()
@@ -187,6 +189,23 @@ bool AGravityCharacter::IsJumping()
 #pragma endregion
 
 #pragma region Interaction
+
+void AGravityCharacter::OnInteractBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ApproachInteractableComp = TryGetApproachInteractableComp();
+	if (ApproachInteractableComp == nullptr) { return; }
+
+	ApproachInteractableComp->ShowInteractionWidget();
+	UE_LOG(LogTemp, Warning, TEXT("Closest Overlap Actor: %s"), *ApproachInteractableComp->GetOwner()->GetName());
+}
+
+void AGravityCharacter::OnInteractBoxEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (ApproachInteractableComp == nullptr) { return; }
+
+	ApproachInteractableComp->HideInteractionWidget();
+}
+
 // Approach Interact
 void AGravityCharacter::OnApproachInteract()
 {
@@ -202,7 +221,7 @@ void AGravityCharacter::OnApproachInteract()
 	ResetClickInteract(CurrentClickFocus);
 
 	// Try to get a ApproachInteractableComponent and execute its Interact() method
-	ApproachInteractableComp = TryGetApproachInteractableComp();
+	// ApproachInteractableComp = TryGetApproachInteractableComp();
 	if (ApproachInteractableComp != nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Interacts with : %s"), *ApproachInteractableComp->GetName());
@@ -219,7 +238,7 @@ void AGravityCharacter::OnApproachInteractReleased()
 	ApproachInteractableComp = nullptr;
 }
 
-UActorComponent* AGravityCharacter::TryGetApproachInteractableComp()
+UApproachInteractComponent* AGravityCharacter::TryGetApproachInteractableComp()
 {
 	TArray<AActor*> OverlappingActors;
 	InteractBox->GetOverlappingActors(OverlappingActors);
@@ -245,7 +264,7 @@ UActorComponent* AGravityCharacter::TryGetApproachInteractableComp()
 		}
 	}
 
-	return GetComponentByInterface<UApproachInteract>(ClosestActor);
+	return Cast<UApproachInteractComponent>(GetComponentByInterface<UApproachInteract>(ClosestActor));
 }
 
 // Click Interact
