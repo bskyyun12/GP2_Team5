@@ -155,7 +155,7 @@ public:
 	bool CanSwapGravity(UActorComponent* Comp1, UActorComponent* Comp2);
 	float GetClickInteractRange() { return ClickInteractRange; }
 	UClickInteractComponent* GetCurrentClickFocus() { return CurrentClickFocus; }
-	FocusType GetClickFocusType(UClickInteractComponent* ClickFocus);
+	EFocusType GetClickFocusType(UClickInteractComponent* ClickFocus);
 
 	UFUNCTION(BlueprintPure)
 	bool HasCurrentClickFocus() { return CurrentClickFocus != nullptr; }

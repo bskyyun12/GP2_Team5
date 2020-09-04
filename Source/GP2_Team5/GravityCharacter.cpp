@@ -320,8 +320,8 @@ void AGravityCharacter::OnClickInteract()
 					if (GetDistanceTo(OverlapComp->GetOwner()) < ClickInteractRange)
 					{
 						// one is player and the other is object. but no Relic1
-						if (GetClickFocusType(CurrentClickFocus) == FocusType::Player && GetClickFocusType(OverlapComp) == FocusType::Object
-							|| GetClickFocusType(CurrentClickFocus) == FocusType::Object && GetClickFocusType(OverlapComp) == FocusType::Player)
+						if (GetClickFocusType(CurrentClickFocus) == EFocusType::Player && GetClickFocusType(OverlapComp) == EFocusType::Object
+							|| GetClickFocusType(CurrentClickFocus) == EFocusType::Object && GetClickFocusType(OverlapComp) == EFocusType::Player)
 						{
 							if (bHasRelic1 == false)
 							{
@@ -330,7 +330,7 @@ void AGravityCharacter::OnClickInteract()
 						}
 
 						// Both are objects. but no Relic2
-						if (GetClickFocusType(CurrentClickFocus) == FocusType::Object && GetClickFocusType(OverlapComp) == FocusType::Object)
+						if (GetClickFocusType(CurrentClickFocus) == EFocusType::Object && GetClickFocusType(OverlapComp) == EFocusType::Object)
 						{
 							if (bHasRelic2 == false)
 							{
@@ -450,22 +450,22 @@ bool AGravityCharacter::CanSwapGravity(UActorComponent* Comp1, UActorComponent* 
 	return true;
 }
 
-FocusType AGravityCharacter::GetClickFocusType(UClickInteractComponent* ClickFocus)
+EFocusType AGravityCharacter::GetClickFocusType(UClickInteractComponent* ClickFocus)
 {
 	if (ClickFocus == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is null"));
-		return FocusType::Null;
+		return EFocusType::Null;
 	}
 
 	if (ClickFocus->GetOwner() == this)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is Player"));
-		return FocusType::Player;
+		return EFocusType::Player;
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is Object"));
-	return FocusType::Object;
+	return EFocusType::Object;
 }
 
 // End Interact

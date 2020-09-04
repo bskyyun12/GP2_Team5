@@ -69,8 +69,8 @@ void UClickInteractComponent::ActivateHighlight(UPrimitiveComponent* TouchedComp
 	// has no ability to swap gravity between player + obj 
 	if (!Player->HasRelic1())
 	{
-		if (Player->GetClickFocusType(Player->GetCurrentClickFocus()) == FocusType::Player && Player->GetClickFocusType(this) == FocusType::Object
-			|| Player->GetClickFocusType(Player->GetCurrentClickFocus()) == FocusType::Object && Player->GetClickFocusType(this) == FocusType::Player)
+		if (Player->GetClickFocusType(Player->GetCurrentClickFocus()) == EFocusType::Player && Player->GetClickFocusType(this) == EFocusType::Object
+			|| Player->GetClickFocusType(Player->GetCurrentClickFocus()) == EFocusType::Object && Player->GetClickFocusType(this) == EFocusType::Player)
 		{
 			bClickable = false;
 		}
@@ -79,7 +79,7 @@ void UClickInteractComponent::ActivateHighlight(UPrimitiveComponent* TouchedComp
 	// has no ability to swap gravity between obj + obj 
 	if (!Player->HasRelic2())
 	{
-		if (Player->GetClickFocusType(Player->GetCurrentClickFocus()) == FocusType::Object && Player->GetClickFocusType(this) == FocusType::Object)
+		if (Player->GetClickFocusType(Player->GetCurrentClickFocus()) == EFocusType::Object && Player->GetClickFocusType(this) == EFocusType::Object)
 		{
 			bClickable = false;
 		}
