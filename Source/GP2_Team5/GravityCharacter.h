@@ -146,9 +146,11 @@ protected:
 	UClickInteractComponent* CurrentClickFocus = nullptr;
 	void ResetClickInteract(UClickInteractComponent*& FocusToReset);
 
-	// 
+	// Grab
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
 	bool bIsGrabbing = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
+	UApproachInteractComponent* CurrentGrabbingBox = nullptr;
 
 	// Powers
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
