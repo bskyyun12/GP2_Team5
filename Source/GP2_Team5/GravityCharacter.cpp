@@ -307,9 +307,17 @@ void AGravityCharacter::OnClickInteract()
 		{
 			if (CurrentClickFocus == nullptr)	// CurrentClickFocus is null
 			{
+				// NewClickFocus is not in player's line of sight
+				if (IsComponentInLineOfSight(NewClickFocus) == false)
+				{
+					ResetClickInteract(CurrentClickFocus);
+					return;
+				}
+
 				UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is null. New CurrentClickFocus: %s"), *NewClickFocus->GetName());
 				CurrentClickFocus = NewClickFocus;
 				CurrentClickFocus->bSelected = true;
+
 				IClickInteract::Execute_ClickInteract(CurrentClickFocus);
 
 				// Outline objects within range
@@ -343,6 +351,12 @@ void AGravityCharacter::OnClickInteract()
 						{
 							continue;
 						}
+
+						//// OverlapComp is not in player's line of sight
+						//if (IsComponentInLineOfSight(OverlapComp) == false)
+						//{
+						//	continue;
+						//}
 
 						OverlapComp->ActivateHighlight(nullptr);
 					}
@@ -447,6 +461,12 @@ bool AGravityCharacter::CanSwapGravity(UActorComponent* Comp1, UActorComponent* 
 		return false;
 	}
 
+	// if one of them is not in player's line of sight
+	if (!IsComponentInLineOfSight(Comp1) || !IsComponentInLineOfSight(Comp2))
+	{
+		return false;
+	}
+
 	return true;
 }
 
@@ -466,6 +486,11 @@ EFocusType AGravityCharacter::GetClickFocusType(UClickInteractComponent* ClickFo
 
 	UE_LOG(LogTemp, Warning, TEXT("CurrentClickFocus is Object"));
 	return EFocusType::Object;
+}
+
+bool AGravityCharacter::IsComponentInLineOfSight(UActorComponent* Comp)
+{
+	return GetWorld()->GetFirstPlayerController()->LineOfSightTo(Comp->GetOwner());
 }
 
 // End Interact
