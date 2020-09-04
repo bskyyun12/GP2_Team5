@@ -94,6 +94,12 @@ void UClickInteractComponent::ActivateHighlight(UPrimitiveComponent* TouchedComp
 		}
 	}
 
+	// this component is not in player's line of sight
+	if (Player->IsComponentInLineOfSight(this) == false)
+	{
+		bClickable = false;
+	}
+
 	bool bIsWithinRange = Player->GetDistanceTo(GetOwner()) < Player->GetClickInteractRange();
 	OnActivateHighlight.Broadcast(bIsWithinRange, bClickable);
 }
@@ -106,6 +112,12 @@ void UClickInteractComponent::DeactivateHighlight(UPrimitiveComponent* TouchedCo
 	if (Player == nullptr || (!Player->HasRelic1() && !Player->HasRelic2()) || bSelected)
 	{
 		return;
+	}
+
+	// this component is not in player's line of sight
+	if (Player->IsComponentInLineOfSight(this) == false)
+	{
+		bClickable = false;
 	}
 
 	bool bIsWithinRange = Player->GetDistanceTo(GetOwner()) < Player->GetClickInteractRange();
