@@ -128,7 +128,7 @@ void UClickInteractComponent::ActivateHighlight(UPrimitiveComponent* TouchedComp
 	}
 
 	bool bIsWithinRange = Player->GetDistanceTo(GetOwner()) < Player->GetClickInteractRange();
-	OnActivateHighlight.Broadcast(bIsWithinRange, Clickable() ? HoverColor : NonClickableColor);
+	OnActivateHighlight.Broadcast(bIsWithinRange, Clickable() ? EHighlightType::Hover : EHighlightType::NonClickable);
 }
 
 void UClickInteractComponent::SwappableHighlight()
@@ -142,7 +142,7 @@ void UClickInteractComponent::SwappableHighlight()
 	bIsSwappableColorOn = true;
 
 	bool bIsWithinRange = Player->GetDistanceTo(GetOwner()) < Player->GetClickInteractRange();
-	OnActivateHighlight.Broadcast(bIsWithinRange, SwappableColor);
+	OnActivateHighlight.Broadcast(bIsWithinRange, EHighlightType::Swappable);
 }
 
 void UClickInteractComponent::DeactivateHighlight(UPrimitiveComponent* TouchedComponent)

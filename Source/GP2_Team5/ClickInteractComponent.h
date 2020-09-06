@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "ClickInteract.h"
+#include "Enums.h"
 #include "ClickInteractComponent.generated.h"
 
 
@@ -41,7 +42,7 @@ public:
 		
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInteractDelegate);
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHighlightActivationDelegate, bool, bIsWithinRange, FColor, HightlightColor);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHighlightActivationDelegate, bool, bIsWithinRange, TEnumAsByte<EHighlightType>, HightlightType);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHighlightDeactivationDelegate, bool, bIsWithinRange, bool, bClickable);
 
 
@@ -59,13 +60,6 @@ public:
 
 	bool bSelected = false;
 	bool bIsSwappableColorOn = false;
-
-	UPROPERTY(EditAnywhere)
-	FColor HoverColor = FColor::Green;
-	UPROPERTY(EditAnywhere)
-	FColor SwappableColor = FColor::Cyan;
-	UPROPERTY(EditAnywhere)
-	FColor NonClickableColor = FColor::Red;
 
 
 public:

@@ -20,6 +20,14 @@ enum class ECollectibleType : uint8
 	Relic2,
 };
 
+UENUM(BlueprintType)
+enum class EHighlightType : uint8
+{
+	Hover,
+	Swappable,
+	NonClickable,
+};
+
 class GP2_TEAM5_API Enums
 {
 public:
