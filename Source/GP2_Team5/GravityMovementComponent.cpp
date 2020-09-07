@@ -2767,9 +2767,13 @@ FRotator UGravityMovementComponent::ComputeOrientToMovementRotation(const FRotat
 
 void UGravityMovementComponent::PhysicsRotation(float DeltaTime)
 {
+	if (!bOrientRotationToMovement)
+		return;
+
 	FRotator CurrentRotation = UpdatedComponent->GetComponentRotation(); // Normalized
 	FRotator DeltaRot = GetDeltaRotation(DeltaTime);
 	FRotator DesiredRotation = ComputeOrientToMovementRotation(CurrentRotation, DeltaTime, DeltaRot);
+
 
 	// Accumulate a desired new rotation.
 	const float AngleTolerance = 1e-3f;
