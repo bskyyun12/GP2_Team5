@@ -42,7 +42,7 @@ public:
 		
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInteractDelegate);
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHighlightActivationDelegate, bool, bIsWithinRange, TEnumAsByte<EHighlightType>, HightlightType);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHighlightActivationDelegate, bool, bIsWithinRange, EHighlightType, HightlightType);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHighlightDeactivationDelegate, bool, bIsWithinRange, bool, bClickable);
 
 

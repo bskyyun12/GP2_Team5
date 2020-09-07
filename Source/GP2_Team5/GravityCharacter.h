@@ -120,7 +120,6 @@ protected:
 
 #pragma endregion
 
-
 #pragma region Interaction
 protected:
 
@@ -150,8 +149,6 @@ protected:
 
 	// Grab
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
-	bool bIsGrabbing = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GravityCharacter|Interaction")
 	UApproachInteractComponent* CurrentGrabbingBox = nullptr;
 
 	// Powers
@@ -169,6 +166,12 @@ public:
 	bool IsComponentInLineOfSight(UActorComponent* Comp);
 
 	UFUNCTION(BlueprintPure)
+	bool IsGrabbing() { return CurrentGrabbingBox != nullptr; }
+
+	UFUNCTION(BlueprintCallable)
+	void ResetCurrentGrabbingBox() { CurrentGrabbingBox = nullptr; }
+
+	UFUNCTION(BlueprintPure)
 	bool HasCurrentClickFocus() { return CurrentClickFocus != nullptr; }
 
 	UFUNCTION(BlueprintPure)
@@ -176,13 +179,6 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	bool HasRelic2() { return bHasRelic2; }
-	/// Check list
-	/// while grabbing -> NO: click interact / approach interact / jump
-	/// while having first click focus -> NO: move, jump, approach interact -> reset first focus
-	/// while jumping -> NO: grab / click interact / approach interact(?)
-	/// 
-	/// </summary>
-
 
 #pragma endregion
 };
