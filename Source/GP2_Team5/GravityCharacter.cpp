@@ -15,6 +15,7 @@
 #include "ClickInteractComponent.h"
 #include "DrawDebugHelpers.h"
 #include "GravitySwapComponent.h"
+#include <TimerManager.h>
 
 // Sets default values
 AGravityCharacter::AGravityCharacter(const FObjectInitializer& ObjectInitializer)
@@ -183,7 +184,7 @@ void AGravityCharacter::SetGravityTarget(FVector NewGravityPoint)
 
 void AGravityCharacter::Jump()
 {
-	if (bIsGrabbing) { return; }
+	if (IsGrabbing()) { return; }
 	ResetClickInteract(CurrentClickFocus);
 
 	ACharacter::Jump();
@@ -218,7 +219,7 @@ void AGravityCharacter::OnInteractBoxEndOverlap(UPrimitiveComponent* OverlappedC
 void AGravityCharacter::OnApproachInteract()
 {
 	// return if the player is currently jumping or grabbing something
-	if (IsJumping() || bIsGrabbing)
+	if (IsJumping() || IsGrabbing())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Cannot ApproachInteract while jumping nor grabbing. Calling OnInteractReleased"));
 		OnApproachInteractReleased();
@@ -307,7 +308,7 @@ UClickInteractComponent* AGravityCharacter::TryGetClickCompUnderCursor(FHitResul
 // Click Interact
 void AGravityCharacter::OnClickInteract()
 {
-	if (IsJumping() || bIsGrabbing)
+	if (IsJumping() || IsGrabbing())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Cannot ClickInteract while jumping nor grabbing. Resetting CurrentClickFocus"));
 		ResetClickInteract(CurrentClickFocus);
