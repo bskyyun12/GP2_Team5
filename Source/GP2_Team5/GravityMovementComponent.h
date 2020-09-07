@@ -49,6 +49,14 @@ public:
 	virtual bool IsWithinEdgeTolerance(const FVector& CapsuleLocation, const FVector& TestImpactPoint, const float CapsuleRadius) const override;
 	// End UCharacterMovementComponent overrides
 
+
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	FRotator DesiredRot;
+	virtual FRotator GetDeltaRotation(float DeltaTime) const override;
+	virtual FRotator ComputeOrientToMovementRotation(const FRotator& CurrentRotation, float DeltaTime, FRotator& DeltaRotation) const override;
+	virtual void PhysicsRotation(float DeltaTime) override;
+
+
 public:
 	// Return the normalized direction of the current gravity.
 	// @note Could return zero gravity.
