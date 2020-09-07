@@ -28,8 +28,8 @@ public:
 	virtual void OnRest_Implementation();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++ Interaction")
-	void OnEnterCheckPoint(AActor* Caller, AActor* CheckPointRef);
-	virtual void OnEnterCheckPoint_Implementation(AActor* Caller, AActor* CheckPointRef);
+	void OnEnterCheckPoint(AActor* Caller, AActor* CheckPointCaller);
+	virtual void OnEnterCheckPoint_Implementation(AActor* Caller, AActor* CheckPointCaller);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++ Interaction")
 	void OnFinnishlevel();

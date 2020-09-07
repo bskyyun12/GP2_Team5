@@ -4,17 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Enums.h"
 #include "Collectible.generated.h"
-
-
-UENUM(BlueprintType)
-enum class ECollectibleType : uint8
-{
-	Coin,
-	Relic1,
-	Relic2,
-};
-
 
 
 UCLASS()
