@@ -2734,3 +2734,66 @@ bool UGravityMovementComponent::IsWithinEdgeToleranceNew(const FVector& CapsuleL
 
 	return DistFromCenterSq < ReducedRadiusSq;
 }
+
+float GetAxisDeltaRotation(float InAxisRotationRate, float DeltaTime)
+{
+	// Values over 360 don't do anything, see FMath::FixedTurn. However we are trying to avoid giant floats from overflowing other calculations.
+	return (InAxisRotationRate >= 0.f) ? FMath::Min(InAxisRotationRate * DeltaTime, 360.f) : 360.f;
+}
+
+FRotator UGravityMovementComponent::GetDeltaRotation(float DeltaTime) const
+{
+	return FRotator(GetAxisDeltaRotation(RotationRate.Pitch, DeltaTime), GetAxisDeltaRotation(RotationRate.Yaw, DeltaTime), GetAxisDeltaRotation(RotationRate.Roll, DeltaTime));
+}
+
+FRotator UGravityMovementComponent::ComputeOrientToMovementRotation(const FRotator& CurrentRotation, float DeltaTime, FRotator& DeltaRotation) const
+{
+	if (Acceleration.SizeSquared() < KINDA_SMALL_NUMBER)
+	{
+
+		// AI path following request can orient us in that direction (it's effectively an acceleration)
+		if (bHasRequestedVelocity && RequestedVelocity.SizeSquared() > KINDA_SMALL_NUMBER)
+		{
+			return RequestedVelocity.GetSafeNormal().Rotation();
+		}
+
+		// Don't change rotation if there is no acceleration.
+		return CurrentRotation;
+	}
+
+	return Acceleration.GetSafeNormal().Rotation();
+
+}
+
+void UGravityMovementComponent::PhysicsRotation(float DeltaTime)
+{
+	FRotator CurrentRotation = UpdatedComponent->GetComponentRotation(); // Normalized
+	FRotator DeltaRot = GetDeltaRotation(DeltaTime);
+	FRotator DesiredRotation = ComputeOrientToMovementRotation(CurrentRotation, DeltaTime, DeltaRot);
+
+	// Accumulate a desired new rotation.
+	const float AngleTolerance = 1e-3f;
+
+	if (!CurrentRotation.Equals(DesiredRotation, AngleTolerance))
+	{
+		// PITCH
+		if (!FMath::IsNearlyEqual(CurrentRotation.Pitch, DesiredRotation.Pitch, AngleTolerance))
+		{
+			DesiredRotation.Pitch = FMath::FixedTurn(CurrentRotation.Pitch, DesiredRotation.Pitch, DeltaRot.Pitch);
+		}
+
+		// YAW
+		if (!FMath::IsNearlyEqual(CurrentRotation.Yaw, DesiredRotation.Yaw, AngleTolerance))
+		{
+			DesiredRotation.Yaw = FMath::FixedTurn(CurrentRotation.Yaw, DesiredRotation.Yaw, DeltaRot.Yaw);
+		}
+
+		//	// ROLL
+		if (!FMath::IsNearlyEqual(CurrentRotation.Roll, DesiredRotation.Roll, AngleTolerance))
+		{
+			DesiredRotation.Roll = FMath::FixedTurn(CurrentRotation.Roll, DesiredRotation.Roll, DeltaRot.Roll);
+		}
+	}
+	DesiredRotation.DiagnosticCheckNaN(TEXT("CharacterMovementComponent::PhysicsRotation(): DesiredRotation"));
+	MoveUpdatedComponent(FVector::ZeroVector, DesiredRotation, /*bSweep*/ false);
+}
